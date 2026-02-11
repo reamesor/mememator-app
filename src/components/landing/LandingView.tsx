@@ -85,20 +85,21 @@ function LandingContent({ onEnter, mounted }: { onEnter: () => void; mounted: bo
             </span>
           </motion.div>
         ))}
-        {/* Center: Trends. Create. Launch. - triangular layout (replacing the 3 circles) */}
+        {/* Center: Trends. Create. Launch. - single line, centered, glow */}
         <div
-          className="mb-6 relative w-64 h-48 sm:w-80 sm:h-56 md:w-96 md:h-64 transition-transform duration-200 ease-out sm:mb-8"
+          className="mb-6 w-full text-center transition-transform duration-200 ease-out sm:mb-8"
           style={{ transform: `translate(${mx * tt}px, ${my * tt}px)` }}
         >
-          <span className="absolute left-0 top-0 font-display text-xl font-semibold tracking-wide text-white drop-shadow-lg sm:text-3xl md:text-4xl lg:text-5xl">
-            Trends.
-          </span>
-          <span className="absolute right-0 top-0 font-display text-xl font-semibold tracking-wide text-white drop-shadow-lg sm:text-3xl md:text-4xl lg:text-5xl">
-            Create.
-          </span>
-          <span className="absolute left-1/2 bottom-0 -translate-x-1/2 font-display text-xl font-semibold tracking-wide text-white drop-shadow-lg sm:text-3xl md:text-4xl lg:text-5xl">
-            Launch.
-          </span>
+          <h1
+            className="font-display inline-block text-lg font-semibold tracking-wide text-white sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl"
+            style={{
+              textShadow: "0 0 24px rgba(255,255,255,0.35), 0 0 48px rgba(34,211,238,0.25), 0 2px 12px rgba(0,0,0,0.5)",
+              whiteSpace: "nowrap",
+              wordSpacing: "0.2em",
+            }}
+          >
+            Trends. Create. Launch.
+          </h1>
         </div>
         <div
           className="transition-transform duration-150 ease-out pointer-events-auto"
