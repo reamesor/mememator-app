@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Wallet } from "lucide-react";
-import CapybaraHead from "@/components/ui/CapybaraHead";
 import BurnTicker from "@/components/ui/BurnTicker";
 import IgnitionHero from "@/components/landing/IgnitionHero";
 import RetroCard from "@/components/ui/RetroCard";
@@ -23,13 +22,13 @@ export default function IgnitionPage() {
     <div className="min-h-screen bg-void-grid-see-through">
       <BurnTicker />
 
-      <header className="sticky top-0 z-30 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b border-zinc-800/80 bg-zinc-950/97 backdrop-blur-md shadow-[0_1px_0_0_rgba(34,211,238,0.06)]">
         <div className="container-tight flex h-12 min-h-12 items-center justify-between gap-2">
           <Link
             href="/?hub=1"
-            className="flex items-center gap-2 font-pixel text-xs text-zinc-500 hover:text-zinc-300 sm:text-sm"
+            className="group flex items-center gap-2.5 rounded-lg border border-zinc-700/60 bg-zinc-900/60 px-3 py-2 font-pixel text-xs text-zinc-400 transition-all hover:border-cyan-500/40 hover:bg-cyan-500/10 hover:text-cyan-400 sm:text-sm"
           >
-            <CapybaraHead className="w-5 h-5 shrink-0" />
+            <img src="/capybara-faces/capybara-1.png" alt="" className="h-5 w-5 shrink-0 object-contain" />
             <ArrowLeft size={16} />
             Back to homepage
           </Link>
@@ -58,9 +57,14 @@ export default function IgnitionPage() {
             <IgnitionHero />
           </div>
 
-          <p className="mb-6 max-w-md text-center font-pixel text-[10px] text-zinc-400 sm:text-xs">
+          <p className="mb-4 max-w-md text-center font-pixel text-[10px] text-zinc-400 sm:text-xs">
             The Forge. Create memes. Launch to Pump.fun. Based.
           </p>
+          <ul className="font-pixel mb-6 flex flex-wrap justify-center gap-x-4 gap-y-1 text-[9px] text-zinc-500 sm:text-[10px]">
+            <li>Create meme with templates & capybara faces</li>
+            <li>Apply style: Retro, AI-Synth, Deep-Fried</li>
+            <li>Burn $MATE & launch to Pump.fun</li>
+          </ul>
 
         <button
           type="button"

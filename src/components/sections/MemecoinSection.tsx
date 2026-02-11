@@ -15,6 +15,9 @@ export default function MemecoinSection() {
         <p className="mb-4 text-xs text-zinc-500 sm:text-sm">
           Hot memecoins on SOL. Price, market cap & 24h volume. Spot the narrative before the next anon does. You&apos;re not early. You&apos;re late. Cope.
         </p>
+        <p className="mb-4 text-[10px] text-zinc-600">
+          Use the themes (hat, sigma, accident, etc.) for your own launch. Check Lore for narrative templates.
+        </p>
         <div className="overflow-x-auto">
           <div className="grid min-w-[520px] gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {memecoinTrends.map((item) => (

@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import CapybaraHead from "@/components/ui/CapybaraHead";
 import BurnTicker from "@/components/ui/BurnTicker";
 import RetroCard from "@/components/ui/RetroCard";
 
@@ -20,13 +19,13 @@ export default function HypeHallPage() {
     <div className="min-h-screen bg-void-grid-see-through">
       <BurnTicker />
 
-      <header className="sticky top-0 z-30 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b border-zinc-800/80 bg-zinc-950/97 backdrop-blur-md shadow-[0_1px_0_0_rgba(34,211,238,0.06)]">
         <div className="container-tight flex h-12 min-h-12 items-center justify-between gap-2">
           <Link
             href="/?hub=1"
-            className="shrink-0 flex items-center gap-2 font-pixel text-xs text-zinc-500 hover:text-zinc-300 sm:text-sm"
+            className="group shrink-0 flex items-center gap-2.5 rounded-lg border border-zinc-700/60 bg-zinc-900/60 px-3 py-2 font-pixel text-xs text-zinc-400 transition-all hover:border-cyan-500/40 hover:bg-cyan-500/10 hover:text-cyan-400 sm:text-sm"
           >
-            <CapybaraHead className="w-5 h-5 shrink-0" />
+            <img src="/capybara-faces/capybara-1.png" alt="" className="h-5 w-5 shrink-0 object-contain" />
             <ArrowLeft size={16} />
             Back to homepage
           </Link>
@@ -43,21 +42,32 @@ export default function HypeHallPage() {
       </header>
 
       <main className="container-tight flex min-h-[calc(100vh-7rem)] flex-col gap-4 p-4 sm:p-5">
-        <RetroCard className="p-3 sm:p-4">
-          <h2 className="font-pixel text-[10px] text-cyan-400">Hype Hall</h2>
-          <p className="mt-1 font-pixel text-[10px] text-zinc-400 sm:text-xs">
-            Trending memes from the Forge. Based.
+        <RetroCard className="p-4 sm:p-5">
+          <h2 className="font-pixel text-sm font-semibold text-cyan-400">Hype Hall</h2>
+          <p className="mt-2 font-pixel text-xs text-zinc-400 sm:text-sm">
+            Trending memes launched from The Forge. This is where tokens get eyeballs—burn $MATE to feature yours.
           </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2.5 py-0.5 font-pixel text-[10px] text-cyan-400">
+              Burn $MATE to boost
+            </span>
+            <span className="rounded-full border border-zinc-600 bg-zinc-800/60 px-2.5 py-0.5 font-pixel text-[10px] text-zinc-500">
+              Newest first
+            </span>
+          </div>
         </RetroCard>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
           {MOCK_MEMES.map((m) => (
             <RetroCard key={m.id} className="overflow-hidden p-3 sm:p-4">
-              <div className="mb-3 flex aspect-video items-center justify-center rounded border border-zinc-800 bg-zinc-900">
-                <span className="font-pixel text-[8px] text-zinc-600">{m.ticker}</span>
+              <div className="mb-3 flex aspect-video items-center justify-center rounded border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-800">
+                <span className="font-pixel text-sm font-bold text-zinc-500">{m.ticker}</span>
               </div>
-              <h3 className="font-pixel text-[10px] text-cyan-400">{m.title}</h3>
+              <h3 className="font-pixel text-xs font-semibold text-cyan-400">{m.title}</h3>
               <p className="mt-1 font-pixel text-[10px] text-zinc-500">
                 {m.style} · Chaos {m.chaos}%
+              </p>
+              <p className="mt-1 font-pixel text-[9px] text-zinc-600">
+                Launched from The Forge
               </p>
             </RetroCard>
           ))}

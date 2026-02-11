@@ -122,6 +122,9 @@ export default function TokenLoreMemeSection() {
         <p className="mb-4 text-xs text-zinc-500 sm:text-sm">
           Create the narrative and meme angle for a token—anything Solana retardness, fun to launch on pump.fun. Name it, write the lore, nail the meme. Copy the block for your pump.fun description or Twitter.
         </p>
+        <p className="mb-4 text-[10px] text-zinc-600 sm:text-xs">
+          Pick a theme for instant inspiration, use AI to improve your lore, or write from scratch. Then send to The Forge to create the meme and launch.
+        </p>
 
         <div className="space-y-4 rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 sm:p-5">
           <div>

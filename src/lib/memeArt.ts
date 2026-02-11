@@ -9,7 +9,12 @@ export type MemeTemplateId =
   | "Two buttons / This is fine"
   | "Change my mind"
   | "Expanding brain"
-  | "Bernie Sanders mittens";
+  | "Bernie Sanders mittens"
+  | "Woman yelling at cat"
+  | "Success kid"
+  | "One does not simply"
+  | "This is fine"
+  | "Left/Right panel";
 
 export function drawMemeTemplateArt(
   ctx: CanvasRenderingContext2D,
@@ -39,6 +44,15 @@ export function drawMemeTemplateArt(
       break;
     case "Bernie Sanders mittens":
       drawBernieMittens(ctx, w, h);
+      break;
+    case "Woman yelling at cat":
+      drawWomanYellingAtCat(ctx, w, h, halfH);
+      break;
+    case "Success kid":
+    case "One does not simply":
+    case "This is fine":
+    case "Left/Right panel":
+      drawGenericTwoPanel(ctx, w, halfH);
       break;
     default:
       drawGenericTwoPanel(ctx, w, halfH);
@@ -412,4 +426,36 @@ function drawGenericTwoPanel(ctx: CanvasRenderingContext2D, w: number, halfH: nu
   ctx.fillRect(0, 0, w, halfH);
   ctx.fillStyle = "#16213e";
   ctx.fillRect(0, halfH, w, halfH);
+}
+
+/** Woman yelling at cat: left = woman yelling, right = cat at table */
+function drawWomanYellingAtCat(ctx: CanvasRenderingContext2D, w: number, h: number, halfH: number) {
+  const leftW = w / 2;
+  const rightW = w - leftW;
+  ctx.fillStyle = "#1e293b";
+  ctx.fillRect(0, 0, leftW, halfH);
+  ctx.fillStyle = "#2e1a4a";
+  ctx.fillRect(0, halfH, leftW, halfH);
+  ctx.fillStyle = "#1e3a4a";
+  ctx.fillRect(leftW, 0, rightW, halfH);
+  ctx.fillStyle = "#1a3a3a";
+  ctx.fillRect(leftW, halfH, rightW, halfH);
+  const scale = Math.min(leftW, halfH) * 0.12;
+  drawStickFigure(ctx, leftW / 3, halfH / 2, scale, "woman", "angry", "right");
+  const catX = leftW + rightW / 2;
+  const catY = halfH / 2;
+  const r = 24;
+  ctx.fillStyle = "#f59e0b";
+  ctx.strokeStyle = "#d97706";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.ellipse(catX, catY - 4, r * 0.9, r, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(catX - r * 0.6, catY - r - 4);
+  ctx.lineTo(catX - r * 0.2, catY - r * 0.5 - 4);
+  ctx.moveTo(catX + r * 0.6, catY - r - 4);
+  ctx.lineTo(catX + r * 0.2, catY - r * 0.5 - 4);
+  ctx.stroke();
 }

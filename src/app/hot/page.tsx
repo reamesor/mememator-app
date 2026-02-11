@@ -3,7 +3,7 @@ import HotTopicsSection from "@/components/sections/HotTopicsSection";
 
 export default function HotPage() {
   return (
-    <SectionLayout title="Hot Topics">
+    <SectionLayout title="Hot Topics" accent="orange">
       <HotTopicsSection />
     </SectionLayout>
   );

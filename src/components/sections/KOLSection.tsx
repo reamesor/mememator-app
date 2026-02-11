@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { kols, politicalFigures, wellKnownPeople, memeAnimals, memeSymbols } from "@/lib/mockData";
+import { kols, politicalFigures, wellKnownPeople, memeAnimals, memeSymbols, hotTopics, memecoinTrends } from "@/lib/mockData";
 import { useForgeDraft } from "@/context/ForgeDraftContext";
 import type { MemeSubject, MemeSubjectCategory, CryptoSentiment } from "@/lib/types";
 import {
@@ -22,9 +22,128 @@ const templates = [
   "Change my mind",
   "Expanding brain",
   "Bernie Sanders mittens",
+  "Woman yelling at cat",
+  "Success kid",
+  "One does not simply",
+  "This is fine",
+  "Left/Right panel",
 ] as const;
 
 type TemplateId = (typeof templates)[number];
+
+const BACKGROUNDS = [
+  { id: "dark", label: "Dark void" },
+  { id: "solana", label: "Solana" },
+  { id: "chart_green", label: "Chart green" },
+  { id: "pump_fun", label: "Pump.fun" },
+  { id: "cyber_noir", label: "Cyber noir" },
+  { id: "rug_red", label: "Rug red" },
+  { id: "sunset_pump", label: "Sunset pump" },
+  { id: "neon_mesh", label: "Neon mesh" },
+  { id: "ocean_depth", label: "Ocean depth" },
+  { id: "aurora", label: "Aurora" },
+  { id: "ai_style", label: "AI-style (procedural)" },
+  { id: "upload", label: "Upload your own" },
+] as const;
+
+function drawBackground(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  bgId: string,
+  bgImageRef?: React.RefObject<HTMLImageElement | null>
+) {
+  if (bgId === "upload" && bgImageRef?.current?.complete && bgImageRef.current.naturalWidth) {
+    ctx.drawImage(bgImageRef.current, 0, 0, w, h);
+    return;
+  }
+
+  const g = ctx.createLinearGradient(0, 0, 0, h);
+  switch (bgId) {
+    case "solana":
+      g.addColorStop(0, "#9945FF");
+      g.addColorStop(0.4, "#14F195");
+      g.addColorStop(1, "#0d0d14");
+      break;
+    case "chart_green":
+      g.addColorStop(0, "#0d0d14");
+      g.addColorStop(0.4, "#166534");
+      g.addColorStop(1, "#15803d");
+      break;
+    case "pump_fun":
+      g.addColorStop(0, "#14532d");
+      g.addColorStop(0.3, "#166534");
+      g.addColorStop(1, "#0d0d14");
+      break;
+    case "cyber_noir":
+      g.addColorStop(0, "#0f172a");
+      g.addColorStop(0.5, "#1e293b");
+      g.addColorStop(1, "#0d0d14");
+      break;
+    case "rug_red":
+      g.addColorStop(0, "#450a0a");
+      g.addColorStop(0.4, "#7f1d1d");
+      g.addColorStop(1, "#0d0d14");
+      break;
+    case "sunset_pump":
+      g.addColorStop(0, "#1a0a2e");
+      g.addColorStop(0.3, "#7c2d12");
+      g.addColorStop(0.6, "#ea580c");
+      g.addColorStop(1, "#0d0d14");
+      break;
+    case "neon_mesh":
+      g.addColorStop(0, "#1e1b4b");
+      g.addColorStop(0.4, "#312e81");
+      g.addColorStop(0.7, "#4c1d95");
+      g.addColorStop(1, "#0d0d14");
+      break;
+    case "ocean_depth":
+      g.addColorStop(0, "#0c4a6e");
+      g.addColorStop(0.4, "#0369a1");
+      g.addColorStop(0.7, "#0e7490");
+      g.addColorStop(1, "#0d0d14");
+      break;
+    case "aurora":
+      g.addColorStop(0, "#052e16");
+      g.addColorStop(0.3, "#14532d");
+      g.addColorStop(0.5, "#064e3b");
+      g.addColorStop(0.8, "#134e4a");
+      g.addColorStop(1, "#0d0d14");
+      break;
+    case "ai_style": {
+      const g1 = ctx.createRadialGradient(w * 0.2, h * 0.2, 0, w, h, w * 0.8);
+      g1.addColorStop(0, "#3b0764");
+      g1.addColorStop(0.3, "#581c87");
+      g1.addColorStop(0.6, "#0f172a");
+      g1.addColorStop(1, "#020617");
+      ctx.fillStyle = g1;
+      ctx.fillRect(0, 0, w, h);
+      const g2 = ctx.createRadialGradient(w * 0.8, h * 0.3, 0, w * 0.5, h, w * 0.6);
+      g2.addColorStop(0, "rgba(34, 211, 238, 0.15)");
+      g2.addColorStop(0.5, "rgba(34, 211, 238, 0.05)");
+      g2.addColorStop(1, "transparent");
+      ctx.fillStyle = g2;
+      ctx.fillRect(0, 0, w, h);
+      const g3 = ctx.createRadialGradient(w * 0.3, h * 0.7, 0, w * 0.5, h * 0.5, w * 0.5);
+      g3.addColorStop(0, "rgba(251, 146, 60, 0.08)");
+      g3.addColorStop(1, "transparent");
+      ctx.fillStyle = g3;
+      ctx.fillRect(0, 0, w, h);
+      return;
+    }
+    default:
+      ctx.fillStyle = "#0d0d14";
+      ctx.fillRect(0, 0, w, h);
+      return;
+  }
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+}
+
+const TRENDING_OPTIONS = [
+  ...hotTopics.slice(0, 6).map((t) => ({ type: "hot" as const, id: t.id, label: t.title.slice(0, 36) + (t.title.length > 36 ? "…" : ""), faceIndex: (parseInt(t.id, 10) % 11) + 1 })),
+  ...memecoinTrends.slice(0, 6).map((m, i) => ({ type: "memecoin" as const, id: m.id, label: `${m.symbol} — ${m.theme}`, faceIndex: (i % 11) + 1 })),
+];
 
 /** Two-panel = top (reject/bad) + bottom (approve/good). One-panel = single caption. */
 const TEMPLATE_LAYOUT: Record<TemplateId, "two_panel" | "one_panel"> = {
@@ -34,6 +153,11 @@ const TEMPLATE_LAYOUT: Record<TemplateId, "two_panel" | "one_panel"> = {
   "Change my mind": "one_panel",
   "Expanding brain": "one_panel",
   "Bernie Sanders mittens": "one_panel",
+  "Woman yelling at cat": "two_panel",
+  "Success kid": "two_panel",
+  "One does not simply": "two_panel",
+  "This is fine": "two_panel",
+  "Left/Right panel": "two_panel",
 };
 
 function getSubjectName(subject: MemeSubject): string {
@@ -77,6 +201,13 @@ export default function KOLSection() {
   const [vibe, setVibe] = useState<MemeSpectrumId>("shitpost_chaotic");
   const [capybaraOverlay, setCapybaraOverlay] = useState<number | null>(null);
   const capybaraImagesRef = useRef<Record<number, HTMLImageElement>>({});
+  const [backgroundId, setBackgroundId] = useState<string>("dark");
+  const [backgroundUpload, setBackgroundUpload] = useState<string | null>(null);
+  const backgroundImageRef = useRef<HTMLImageElement | null>(null);
+  const [mainCharacterMode, setMainCharacterMode] = useState<"template" | "capybara" | "upload" | "trending">("template");
+  const [mainCharacterCapybara, setMainCharacterCapybara] = useState<number>(1);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [trendingOption, setTrendingOption] = useState<{ type: "hot" | "memecoin"; id: string } | null>(null);
 
   const formatTag = TEMPLATE_FORMAT_MAP[memeTemplate] ?? "image_macro";
   const formatLabel = FORMAT_TAGS.find((f) => f.id === formatTag)?.label ?? formatTag;
@@ -174,8 +305,59 @@ export default function KOLSection() {
     const isTwoPanel = layout === "two_panel";
     const panelH = isTwoPanel ? h / 2 : h;
 
-    // Draw character/art for the chosen template first (the main reason for memes)
-    drawMemeTemplateArt(ctx, memeTemplate as MemeTemplateId, w, h);
+    // 1. Background
+    drawBackground(ctx, w, h, backgroundId, backgroundImageRef);
+
+    // 2. Main character
+    const drawCustomCharacter = (img: HTMLImageElement | null, size: number) => {
+      if (!img?.complete || !img.naturalWidth) return;
+      const x = w / 2 - size / 2;
+      const y = isTwoPanel ? panelH / 2 - size / 2 : h / 2 - size / 2 - 40;
+      ctx.drawImage(img, x, y, size, size);
+    };
+
+    if (mainCharacterMode === "template") {
+      drawMemeTemplateArt(ctx, memeTemplate as MemeTemplateId, w, h);
+    } else if (mainCharacterMode === "capybara") {
+      const img = capybaraImagesRef.current[mainCharacterCapybara];
+      if (!img) {
+        const nextImg = new Image();
+        nextImg.src = `/capybara-faces/capybara-${mainCharacterCapybara}.png`;
+        nextImg.onload = () => {
+          capybaraImagesRef.current[mainCharacterCapybara] = nextImg;
+          drawMeme();
+        };
+      } else {
+        drawCustomCharacter(img, 220);
+      }
+    } else if (mainCharacterMode === "upload" && uploadedImage) {
+      const img = new Image();
+      img.src = uploadedImage;
+      if (img.complete && img.naturalWidth) {
+        const size = Math.min(280, w * 0.6, h * 0.5);
+        const x = w / 2 - size / 2;
+        const y = isTwoPanel ? panelH / 2 - size / 2 : h / 2 - size / 2 - 30;
+        ctx.drawImage(img, x, y, size, size);
+      } else {
+        img.onload = () => drawMeme();
+      }
+    } else if (mainCharacterMode === "trending" && trendingOption) {
+      const opt = TRENDING_OPTIONS.find((o) => o.type === trendingOption.type && o.id === trendingOption.id);
+      const faceIdx = opt?.faceIndex ?? 1;
+      const img = capybaraImagesRef.current[faceIdx];
+      if (!img) {
+        const nextImg = new Image();
+        nextImg.src = `/capybara-faces/capybara-${faceIdx}.png`;
+        nextImg.onload = () => {
+          capybaraImagesRef.current[faceIdx] = nextImg;
+          drawMeme();
+        };
+      } else {
+        drawCustomCharacter(img, 200);
+      }
+    } else {
+      drawMemeTemplateArt(ctx, memeTemplate as MemeTemplateId, w, h);
+    }
 
     const padding = 24;
     const maxTextWidth = w - padding * 2;
@@ -213,13 +395,13 @@ export default function KOLSection() {
     ctx.font = "12px system-ui, sans-serif";
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
-    ctx.fillText(`Mememator $MATE · ${getSubjectName(subject)} · ${memeTemplate}`, 12, h - 16);
+    ctx.fillText(`Mememator $MATE · ${getSubjectName(subject)}`, 12, h - 16);
     ctx.textAlign = "center";
   };
 
   useEffect(() => {
     if (subject && (layout === "one_panel" ? captionToUse : true)) drawMeme();
-  }, [subject, captionToUse, topToUse, bottomToUse, memeTemplate, visualStyle, vibe, layout, capybaraOverlay]);
+  }, [subject, captionToUse, topToUse, bottomToUse, memeTemplate, visualStyle, vibe, layout, capybaraOverlay, backgroundId, mainCharacterMode, mainCharacterCapybara, uploadedImage, trendingOption, backgroundUpload]);
 
   const handleDownload = () => {
     const canvas = canvasRef.current;
@@ -538,21 +720,170 @@ export default function KOLSection() {
               )}
             </p>
 
+            <div className="mb-3">
+              <label className="mb-1.5 block text-xs font-medium text-zinc-400">Background</label>
+              <div className="flex flex-wrap gap-2">
+                {BACKGROUNDS.map((b) => (
+                  <button
+                    key={b.id}
+                    type="button"
+                    onClick={() => setBackgroundId(b.id)}
+                    className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
+                      backgroundId === b.id
+                        ? "border-cyan-500 bg-cyan-500/20 text-cyan-400"
+                        : "border-zinc-600 bg-zinc-800 text-zinc-400 hover:border-zinc-500"
+                    }`}
+                  >
+                    {b.label}
+                  </button>
+                ))}
+              </div>
+              {backgroundId === "upload" && (
+                <div className="mt-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) {
+                        const url = URL.createObjectURL(f);
+                        const img = new Image();
+                        img.onload = () => {
+                          backgroundImageRef.current = img;
+                          setBackgroundUpload(url);
+                        };
+                        img.src = url;
+                      }
+                    }}
+                    className="block w-full max-w-xs text-xs text-zinc-400 file:mr-2 file:rounded-lg file:border-0 file:bg-cyan-500/20 file:px-3 file:py-2 file:text-xs file:font-medium file:text-cyan-400 hover:file:bg-cyan-500/30"
+                  />
+                  {backgroundUpload && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (backgroundImageRef.current?.src) URL.revokeObjectURL(backgroundImageRef.current.src);
+                        backgroundImageRef.current = null;
+                        setBackgroundUpload(null);
+                      }}
+                      className="mt-1 text-[10px] text-zinc-500 hover:text-cyan-400"
+                    >
+                      Clear upload
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="mb-3">
+              <label className="mb-1.5 block text-xs font-medium text-zinc-400">Main character</label>
+              <div className="flex flex-wrap gap-2">
+                {(["template", "capybara", "upload", "trending"] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setMainCharacterMode(mode)}
+                    className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
+                      mainCharacterMode === mode
+                        ? "border-cyan-500 bg-cyan-500/20 text-cyan-400"
+                        : "border-zinc-600 bg-zinc-800 text-zinc-400 hover:border-zinc-500"
+                    }`}
+                  >
+                    {mode === "template" && "Template"}
+                    {mode === "capybara" && "$MATE Capybara"}
+                    {mode === "upload" && "Upload photo"}
+                    {mode === "trending" && "From trends"}
+                  </button>
+                ))}
+              </div>
+              {mainCharacterMode === "capybara" && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {Array.from({ length: 11 }, (_, i) => i + 1).map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setMainCharacterCapybara(n)}
+                      className={`h-9 w-9 overflow-hidden rounded-lg border transition ${
+                        mainCharacterCapybara === n ? "border-cyan-500 ring-1 ring-cyan-500/50" : "border-zinc-600 hover:border-zinc-500"
+                      }`}
+                    >
+                      <img src={`/capybara-faces/capybara-${n}.png`} alt={`${n}`} className="h-full w-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+              {mainCharacterMode === "upload" && (
+                <div className="mt-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) {
+                        const url = URL.createObjectURL(f);
+                        setUploadedImage(url);
+                      }
+                    }}
+                    className="block w-full max-w-xs text-xs text-zinc-400 file:mr-2 file:rounded-lg file:border-0 file:bg-cyan-500/20 file:px-3 file:py-2 file:text-xs file:font-medium file:text-cyan-400 hover:file:bg-cyan-500/30"
+                  />
+                  {uploadedImage && (
+                    <button
+                      type="button"
+                      onClick={() => setUploadedImage(null)}
+                      className="mt-1 text-[10px] text-zinc-500 hover:text-cyan-400"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+              )}
+              {mainCharacterMode === "trending" && (
+                <div className="mt-2 max-h-32 overflow-y-auto">
+                  <p className="mb-1.5 text-[10px] text-zinc-500">Solana / Twitter trends — pick one</p>
+                  <div className="flex flex-wrap gap-2">
+                    {TRENDING_OPTIONS.map((o) => (
+                      <button
+                        key={`${o.type}-${o.id}`}
+                        type="button"
+                        onClick={() => setTrendingOption({ type: o.type, id: o.id })}
+                        className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-left text-[10px] transition ${
+                          trendingOption?.type === o.type && trendingOption?.id === o.id
+                            ? "border-cyan-500 bg-cyan-500/20 text-cyan-400"
+                            : "border-zinc-600 bg-zinc-800 text-zinc-400 hover:border-zinc-500"
+                        }`}
+                      >
+                        <img
+                          src={`/capybara-faces/capybara-${o.faceIndex}.png`}
+                          alt=""
+                          className="h-6 w-6 shrink-0 rounded object-cover"
+                        />
+                        <span className="line-clamp-1">{o.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="mb-3 grid gap-3 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-xs text-zinc-400">Layout / format</label>
-                <select
-                  value={memeTemplate}
-                  onChange={(e) => setMemeTemplate(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-zinc-200"
-                >
+                <label className="mb-1.5 block text-xs font-medium text-zinc-400">Layout / format</label>
+                <div className="max-h-40 overflow-y-auto rounded-lg border border-zinc-700 bg-zinc-800/80 p-1.5">
                   {templates.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setMemeTemplate(t)}
+                      className={`mb-1 w-full rounded-md px-2.5 py-2 text-left text-xs transition last:mb-0 ${
+                        memeTemplate === t
+                          ? "bg-cyan-500/25 text-cyan-300 ring-1 ring-cyan-500/50"
+                          : "text-zinc-300 hover:bg-zinc-700/80 hover:text-zinc-100"
+                      }`}
+                    >
+                      {memeTemplate === t && "✓ "}{t}
+                    </button>
                   ))}
-                </select>
-                <p className="mt-0.5 text-[10px] text-zinc-500">→ {formatLabel}</p>
+                </div>
+                <p className="mt-1 text-[10px] text-zinc-500">→ {formatLabel}</p>
               </div>
               <div>
                 <label className="mb-1 block text-xs text-zinc-400">Visual style</label>

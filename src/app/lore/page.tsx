@@ -3,7 +3,7 @@ import TokenLoreMemeSection from "@/components/sections/TokenLoreMemeSection";
 
 export default function LorePage() {
   return (
-    <SectionLayout title="Token Lore & Meme">
+    <SectionLayout title="Token Lore & Meme" accent="amber">
       <TokenLoreMemeSection />
     </SectionLayout>
   );

@@ -8,36 +8,6 @@ const CAPYBARA_FACES = Array.from({ length: 11 }, (_, i) => `/capybara-faces/cap
 
 const BG_COLOR = "#0d0d14"; /* Deep Solana purple-black */
 const STROKE_COLOR = "#ffffff";
-const STROKE_WIDTH = 2.5;
-
-/* Pure Linings: minimalist single-line capybara with astronaut helmet */
-const CapybaraSVG = () => (
-  <svg
-    viewBox="0 0 200 120"
-    fill="none"
-    stroke={STROKE_COLOR}
-    strokeWidth={STROKE_WIDTH}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="w-full h-full"
-    preserveAspectRatio="xMidYMid meet"
-  >
-    {/* Body: rounded loaf shape */}
-    <path d="M 45 75 Q 25 70 22 55 Q 20 38 32 28 Q 42 20 55 22" />
-    {/* Head + helmet dome */}
-    <path d="M 55 22 L 62 16 Q 75 12 88 18 Q 95 24 92 32" />
-    {/* Back + belly */}
-    <path d="M 92 32 Q 98 45 95 60 Q 90 78 75 85 Q 58 90 45 82 Q 35 78 32 65" />
-    {/* Helmet bubble */}
-    <ellipse cx="75" cy="22" rx="16" ry="14" strokeWidth={STROKE_WIDTH - 0.5} />
-    {/* Eye dot */}
-    <circle cx="68" cy="20" r="1.5" strokeWidth={STROKE_WIDTH - 0.5} />
-    {/* Ear */}
-    <ellipse cx="40" cy="28" rx="6" ry="9" strokeWidth={STROKE_WIDTH - 0.5} />
-    {/* Chill floating paws */}
-    <path d="M 22 55 L 15 62 M 28 58 L 22 66" strokeWidth={STROKE_WIDTH - 0.5} />
-  </svg>
-);
 
 function Star({ cx, cy, r, delay }: { cx: number; cy: number; r: number; delay: number }) {
   return (
@@ -113,47 +83,28 @@ export default function SpaceCapybaraHero() {
         </svg>
       </motion.div>
 
-      {/* Capybara - cruising horizontally + bobbing */}
-      <motion.div
-        className="absolute bottom-[10%] sm:bottom-[12%] left-0 w-[140px] h-[84px] sm:w-[180px] sm:h-[108px] md:w-[220px] md:h-[132px]"
-        initial={{ x: "-15%" }}
-        animate={{
-          x: ["-15%", "115%"],
-          y: [0, 8, 0],
-        }}
-        transition={{
-          x: { duration: 18, repeat: Infinity, ease: "linear" },
-          y: { duration: 2.5, repeat: Infinity, ease: "easeInOut" },
-        }}
-      >
-        <CapybaraSVG />
-      </motion.div>
-
-      {/* Second capybara pass (optional depth) - slightly offset timing */}
-      <motion.div
-        className="absolute bottom-[18%] sm:bottom-[20%] left-0 w-[100px] h-[60px] sm:w-[120px] sm:h-[72px] opacity-40"
-        initial={{ x: "50%" }}
-        animate={{
-          x: ["50%", "180%"],
-          y: [0, -6, 0],
-        }}
-        transition={{
-          x: { duration: 22, repeat: Infinity, ease: "linear" },
-          y: { duration: 3, repeat: Infinity, ease: "easeInOut" },
-        }}
-        style={{ transform: "scaleX(-1)" }}
-      >
-        <CapybaraSVG />
-      </motion.div>
-
-      {/* Floating pixel-art capybara faces — chilling in outer space */}
+      {/* Floating pixel-art capybara faces — all new ones, no old line-art */}
       {[
-        { left: "4%", top: "18%", size: 40, dur: 4, delay: 0 },
-        { right: "6%", top: "75%", size: 44, dur: 4.5, delay: 0.3 },
-        { left: "12%", top: "85%", size: 36, dur: 3.8, delay: 0.6 },
-        { right: "16%", top: "28%", size: 38, dur: 4.2, delay: 0.2 },
-        { left: "22%", top: "45%", size: 32, dur: 5, delay: 0.5 },
-        { right: "8%", top: "52%", size: 34, dur: 4.3, delay: 0.4 },
+        { left: "2%", top: "12%", size: 44, dur: 4, delay: 0 },
+        { right: "3%", top: "18%", size: 40, dur: 4.5, delay: 0.2 },
+        { left: "6%", top: "45%", size: 48, dur: 3.8, delay: 0.5 },
+        { right: "5%", top: "55%", size: 42, dur: 5, delay: 0.3 },
+        { left: "4%", top: "78%", size: 38, dur: 4.2, delay: 0.7 },
+        { right: "8%", top: "82%", size: 46, dur: 4.8, delay: 0.1 },
+        { left: "12%", top: "28%", size: 36, dur: 5.2, delay: 0.4 },
+        { right: "14%", top: "68%", size: 40, dur: 3.6, delay: 0.6 },
+        { left: "18%", top: "8%", size: 34, dur: 4.4, delay: 0.8 },
+        { right: "22%", top: "42%", size: 44, dur: 4.6, delay: 0.2 },
+        { left: "20%", top: "88%", size: 32, dur: 5.5, delay: 0.5 },
+        { right: "28%", top: "22%", size: 38, dur: 3.9, delay: 0.3 },
+        { left: "32%", top: "72%", size: 42, dur: 4.7, delay: 0.9 },
+        { right: "35%", top: "5%", size: 36, dur: 4.1, delay: 0.1 },
+        { left: "78%", top: "15%", size: 44, dur: 4.3, delay: 0.4 },
+        { right: "72%", top: "48%", size: 40, dur: 5.1, delay: 0.6 },
+        { left: "75%", top: "82%", size: 38, dur: 3.7, delay: 0.2 },
+        { right: "85%", top: "25%", size: 46, dur: 4.9, delay: 0.7 },
+        { left: "88%", top: "58%", size: 34, dur: 4.5, delay: 0.3 },
+        { right: "92%", top: "88%", size: 42, dur: 5.3, delay: 0.5 },
       ].map((p, i) => (
         <motion.div
           key={`float-${i}`}

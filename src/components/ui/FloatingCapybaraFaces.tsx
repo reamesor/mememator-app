@@ -75,7 +75,7 @@ export default function FloatingCapybaraFaces() {
           <img
             src={CAPYBARA_IMAGES[i % CAPYBARA_IMAGES.length]}
             alt=""
-            className="h-full w-full object-contain opacity-70 drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]"
+            className="h-full w-full object-contain opacity-80 drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)]"
             draggable={false}
           />
         </motion.div>

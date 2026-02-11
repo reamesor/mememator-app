@@ -41,14 +41,14 @@ export default function PumpSection() {
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {pumpFunFacts.map((fact) => (
-            <div
-              key={fact.id}
-              className={`card-hover rounded-lg border p-3 ${
-                fact.funny
-                  ? "border-amber-500/30 bg-amber-500/5"
-                  : "border-zinc-800 bg-zinc-900/50"
-              }`}
-            >
+<div
+            key={fact.id}
+            className={`rounded-xl border p-4 transition-all duration-200 hover:scale-[1.01] hover:shadow-lg ${
+              fact.funny
+                ? "border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-transparent hover:shadow-amber-500/10"
+                : "border-emerald-500/20 bg-gradient-to-br from-emerald-500/5 to-transparent hover:shadow-emerald-500/5"
+            }`}
+          >
               {fact.funny && (
                 <span className="mb-1 inline-block text-[10px] font-medium text-amber-400">
                   🤡 Peak retardness
@@ -60,6 +60,15 @@ export default function PumpSection() {
           ))}
         </div>
 
+        <div className="mt-6 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
+          <h4 className="mb-2 text-xs font-semibold text-zinc-300">Pro tips from degens</h4>
+          <ul className="space-y-1.5 text-[10px] text-zinc-500 sm:text-xs">
+            <li>• Use Mememator&apos;s Forge to create the meme first—then launch with one click.</li>
+            <li>• Write lore before you launch. Copy from our Lore page. Narrative = volume.</li>
+            <li>• Burn $MATE at launch to feature in Hype Hall and get more eyes.</li>
+            <li>• 1 SOL to launch. Set aside a bit more for initial buys if you want to seed liquidity.</li>
+          </ul>
+        </div>
         <p className="mt-4 text-center text-xs text-zinc-600">
           Not financial advice. We&apos;re just here for the memes and the bonding curves.
         </p>

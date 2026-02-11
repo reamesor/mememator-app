@@ -33,6 +33,9 @@ export default function HotTopicsSection() {
         <p className="mb-4 text-xs text-zinc-500 sm:text-sm">
           Latest Solana trends. What&apos;s moving, what&apos;s funny as shit, and what&apos;s completely retarded. Everyone can see it.
         </p>
+        <p className="mb-4 text-[10px] text-zinc-600">
+          Spot the narrative, then head to the Meme generator or Lore page to turn it into content. Launch when ready.
+        </p>
 
         <div className="mb-4 flex flex-wrap gap-1.5">
           <button
@@ -62,12 +65,12 @@ export default function HotTopicsSection() {
           {filtered.map((topic) => (
             <div
               key={topic.id}
-              className={`card-hover rounded-lg border p-3 ${
+              className={`rounded-xl border p-4 transition-all duration-200 hover:scale-[1.01] hover:shadow-lg ${
                 topic.vibe === "trending"
-                  ? "border-cyan-500/20 bg-zinc-900/50"
+                  ? "border-cyan-500/30 bg-gradient-to-br from-cyan-500/5 to-transparent hover:shadow-cyan-500/10"
                   : topic.vibe === "funny"
-                    ? "border-amber-500/20 bg-amber-500/5"
-                    : "border-purple-500/20 bg-purple-500/5"
+                    ? "border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-transparent hover:shadow-amber-500/10"
+                    : "border-purple-500/30 bg-gradient-to-br from-purple-500/5 to-transparent hover:shadow-purple-500/10"
               }`}
             >
               <div className="mb-1 flex flex-wrap items-center gap-1.5">

@@ -69,4 +69,9 @@ export const TEMPLATE_FORMAT_MAP: Record<string, FormatTagId> = {
   "Change my mind": "screencap",
   "Expanding brain": "multi_panel",
   "Bernie Sanders mittens": "screencap",
+  "Woman yelling at cat": "object_labeling",
+  "Success kid": "image_macro",
+  "One does not simply": "image_macro",
+  "This is fine": "image_macro",
+  "Left/Right panel": "multi_panel",
 };

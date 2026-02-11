@@ -5,7 +5,6 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight, Zap } from "lucide-react";
 import LandingView from "./landing/LandingView";
-import CapybaraHead from "@/components/ui/CapybaraHead";
 import SpaceCapybaraHero from "./home/SpaceCapybaraHero";
 import LoreSection from "./home/LoreSection";
 import CommanderMateMemeGenerator from "./home/CommanderMateMemeGenerator";
@@ -23,13 +22,13 @@ const HUB_LINKS = [
 ] as const;
 
 const colorClasses: Record<string, string> = {
-  orange: "border-orange-500/30 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20",
-  green: "border-green-500/30 bg-green-500/10 text-green-400 hover:bg-green-500/20",
-  purple: "border-purple-500/30 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20",
-  amber: "border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20",
-  cyan: "border-cyan-500/30 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20",
-  rose: "border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20",
-  sky: "border-sky-500/30 bg-sky-500/10 text-sky-400 hover:bg-sky-500/20",
+  orange: "border-orange-500/30 bg-gradient-to-br from-orange-500/15 to-orange-600/5 text-orange-400 hover:border-orange-400/50 hover:from-orange-500/25 hover:shadow-lg hover:shadow-orange-500/10",
+  green: "border-green-500/30 bg-gradient-to-br from-green-500/15 to-green-600/5 text-green-400 hover:border-green-400/50 hover:from-green-500/25 hover:shadow-lg hover:shadow-green-500/10",
+  purple: "border-purple-500/30 bg-gradient-to-br from-purple-500/15 to-purple-600/5 text-purple-400 hover:border-purple-400/50 hover:from-purple-500/25 hover:shadow-lg hover:shadow-purple-500/10",
+  amber: "border-amber-500/30 bg-gradient-to-br from-amber-500/15 to-amber-600/5 text-amber-400 hover:border-amber-400/50 hover:from-amber-500/25 hover:shadow-lg hover:shadow-amber-500/10",
+  cyan: "border-cyan-500/30 bg-gradient-to-br from-cyan-500/15 to-cyan-600/5 text-cyan-400 hover:border-cyan-400/50 hover:from-cyan-500/25 hover:shadow-lg hover:shadow-cyan-500/10",
+  rose: "border-rose-500/30 bg-gradient-to-br from-rose-500/15 to-rose-600/5 text-rose-400 hover:border-rose-400/50 hover:from-rose-500/25 hover:shadow-lg hover:shadow-rose-500/10",
+  sky: "border-sky-500/30 bg-gradient-to-br from-sky-500/15 to-sky-600/5 text-sky-400 hover:border-sky-400/50 hover:from-sky-500/25 hover:shadow-lg hover:shadow-sky-500/10",
 };
 
 function PurposeBlock() {
@@ -60,7 +59,7 @@ function PurposeBlock() {
             <span className="font-semibold text-cyan-400">chaos meets capital.</span>
           </p>
           <p className="mt-1.5 text-[10px] text-zinc-500 sm:text-xs">
-            Lore → Meme → Forge → Pump. We got you.
+            <span className="text-cyan-400/80">Lore</span> → <span className="text-cyan-400/80">Meme</span> → <span className="text-cyan-400/80">Forge</span> → <span className="text-cyan-400/80">Pump</span>. Hot topics, KOL memes, token lore, capybara faces, one-click launch. We got you.
           </p>
         </div>
       </div>
@@ -102,7 +101,7 @@ export default function AppWithEntry() {
                   className="min-h-[2.75rem] min-w-[2.75rem] shrink-0 flex items-center gap-2 rounded px-3 py-2 text-xs font-medium text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300 transition sm:text-sm"
                   title="Back to globe"
                 >
-                  <CapybaraHead className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
+                  <img src="/capybara-faces/capybara-1.png" alt="" className="w-5 h-5 sm:w-6 sm:h-6 shrink-0 object-contain" />
                   ← Globe
                 </button>
               </div>
@@ -156,7 +155,7 @@ export default function AppWithEntry() {
                 <Link
                   key={href}
                   href={href}
-                  className={`group flex min-h-[3.5rem] items-center justify-between gap-3 rounded-xl border p-4 transition-all duration-200 active:scale-[0.99] hover:scale-[1.02] hover:shadow-lg sm:min-h-0 sm:p-5 ${colorClasses[color]}`}
+                  className={`group flex min-h-[3.5rem] items-center justify-between gap-3 rounded-xl border p-4 transition-all duration-200 active:scale-[0.99] hover:scale-[1.02] hover:shadow-xl sm:min-h-0 sm:p-5 ${colorClasses[color]}`}
                 >
                   <div className="min-w-0">
                     <span className="block text-sm font-semibold tracking-tight sm:text-base">{label}</span>
@@ -171,7 +170,7 @@ export default function AppWithEntry() {
 
           <footer className="mt-auto border-t border-zinc-800/80 px-4 py-5 sm:py-8">
             <p className="flex items-center justify-center gap-2 text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-600 sm:text-xs">
-              <CapybaraHead className="w-4 h-4 shrink-0" />
+              <img src="/capybara-faces/capybara-1.png" alt="" className="w-4 h-4 shrink-0 object-contain" />
               Mememator $MATE — Solana meme-to-market. NFA.
             </p>
           </footer>

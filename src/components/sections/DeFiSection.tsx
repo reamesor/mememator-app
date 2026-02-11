@@ -12,6 +12,9 @@ export default function DeFiSection() {
         <p className="mb-4 text-xs text-zinc-500 sm:text-sm">
           The Solana stack. Pump.fun for launch, Jupiter to swap, Raydium when you graduate. No ETH maxi allowed.
         </p>
+        <p className="mb-4 text-[10px] text-zinc-600">
+          Mememator plugs into Pump.fun—create your meme in The Forge, burn $MATE, launch. One flow.
+        </p>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {defiTrends.map((item) => (
             <div

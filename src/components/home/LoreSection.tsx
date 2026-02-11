@@ -62,6 +62,17 @@ export default function LoreSection() {
                 round and heavy to be rug-pulled. If a dev tries, they just break their back.
               </p>
             </div>
+
+            <div>
+              <h3 className="mb-2 text-cyan-400/90 font-medium uppercase tracking-wider text-[10px] sm:text-xs">
+                The Forge
+              </h3>
+              <p>
+                MATE chose Solana because 30,000 TPS means he can nap between blocks. His spirit lives in every meme
+                created in The Forge. When you burn $MATE to launch, you&apos;re feeding the Cosmic Loaf. When you hold,
+                you&apos;re part of the Pure Lining. No cult. Just vibes.
+              </p>
+            </div>
           </div>
         </motion.div>
       </div>

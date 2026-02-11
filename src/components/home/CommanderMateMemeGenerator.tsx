@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 const CAPYBARA_FACES = Array.from({ length: 11 }, (_, i) => `/capybara-faces/capybara-${i + 1}.png`);
 
@@ -17,16 +17,192 @@ const PRESET_FEELINGS = [
   "Commander MATE, deploy narrative",
   "Waiting for the next 100x",
   "LP burned. Based.",
+  "Red candles? What red candles.",
+  "Touch grass? Building on Solana.",
+  "Paper hands sold. I'm still here.",
+  "The bonding curve is my therapy.",
 ];
+
+const MEME_WIDTH = 900;
+const MEME_HEIGHT = 600;
+
+function roundBubble(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number
+) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function wrapText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  lineHeight: number,
+  fontSize: number,
+  fontWeight: string
+) {
+  ctx.font = `${fontWeight} ${fontSize}px system-ui, sans-serif`;
+  const words = text.split(" ");
+  let line = "";
+  const lines: string[] = [];
+  for (const word of words) {
+    const test = line ? `${line} ${word}` : word;
+    const m = ctx.measureText(test);
+    if (m.width > maxWidth && line) {
+      lines.push(line);
+      line = word;
+    } else line = test;
+  }
+  if (line) lines.push(line);
+  const startY = y - ((lines.length - 1) * lineHeight) / 2;
+  lines.forEach((l, i) => {
+    ctx.fillText(l, x, startY + i * lineHeight);
+  });
+}
+
+function drawMeme(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  feeling: string,
+  thinking: string
+) {
+  const w = MEME_WIDTH;
+  const h = MEME_HEIGHT;
+
+  // Rich gradient background
+  const bgGradient = ctx.createLinearGradient(0, 0, w, h);
+  bgGradient.addColorStop(0, "#0a0e1a");
+  bgGradient.addColorStop(0.3, "#0d1525");
+  bgGradient.addColorStop(0.6, "#0a121f");
+  bgGradient.addColorStop(1, "#050810");
+  ctx.fillStyle = bgGradient;
+  ctx.fillRect(0, 0, w, h);
+
+  // Glow overlay
+  const glow = ctx.createRadialGradient(w / 2, h * 0.6, 0, w / 2, h * 0.6, w * 0.8);
+  glow.addColorStop(0, "rgba(34, 211, 238, 0.08)");
+  glow.addColorStop(0.5, "rgba(34, 211, 238, 0.03)");
+  glow.addColorStop(1, "transparent");
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, w, h);
+
+  // Capybara - larger, centered at bottom
+  const faceSize = 280;
+  const faceX = w / 2 - faceSize / 2;
+  const faceY = h - faceSize - 56;
+  ctx.drawImage(img, faceX, faceY, faceSize, faceSize);
+
+  // Thought bubbles - comic style with tails
+  const bubblePad = 48;
+  const bubbleW = w - bubblePad * 2;
+  const bubbleH = 88;
+  const gap = 20;
+  const bubbleY1 = 56;
+  const bubbleY2 = bubbleY1 + bubbleH + gap;
+
+  const bubbleRadius = 20;
+  const tailSize = 24;
+
+  ctx.shadowColor = "rgba(34, 211, 238, 0.15)";
+  ctx.shadowBlur = 24;
+
+  ctx.fillStyle = "rgba(255, 255, 255, 0.98)";
+  ctx.strokeStyle = "rgba(34, 211, 238, 0.6)";
+  ctx.lineWidth = 2;
+  roundBubble(ctx, bubblePad, bubbleY1, bubbleW, bubbleH, bubbleRadius);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = "rgba(255, 255, 255, 0.98)";
+  roundBubble(ctx, bubblePad, bubbleY2, bubbleW, bubbleH, bubbleRadius);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.shadowBlur = 0;
+
+  // Bubble tail for top bubble (points toward capybara)
+  ctx.fillStyle = "rgba(255, 255, 255, 0.98)";
+  ctx.strokeStyle = "rgba(34, 211, 238, 0.6)";
+  ctx.beginPath();
+  ctx.moveTo(w / 2 - tailSize / 2, bubbleY1 + bubbleH);
+  ctx.lineTo(w / 2, bubbleY1 + bubbleH + tailSize);
+  ctx.lineTo(w / 2 + tailSize / 2, bubbleY1 + bubbleH);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = "rgba(255, 255, 255, 0.98)";
+  ctx.beginPath();
+  ctx.moveTo(w / 2 - tailSize / 2, bubbleY2 + bubbleH);
+  ctx.lineTo(w / 2, bubbleY2 + bubbleH + tailSize);
+  ctx.lineTo(w / 2 + tailSize / 2, bubbleY2 + bubbleH);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = "#0a0e1a";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = "600 14px system-ui, sans-serif";
+  ctx.fillStyle = "rgba(34, 211, 238, 0.95)";
+  ctx.fillText("FEELING", w / 2, bubbleY1 + 28);
+  ctx.fillStyle = "#0a0e1a";
+  wrapText(ctx, feeling, w / 2, bubbleY1 + 60, bubbleW - 56, 26, 22, "700");
+  ctx.fillStyle = "rgba(34, 211, 238, 0.95)";
+  ctx.fillText("THINKING", w / 2, bubbleY2 + 28);
+  ctx.fillStyle = "#0a0e1a";
+  wrapText(ctx, thinking, w / 2, bubbleY2 + 60, bubbleW - 56, 26, 22, "700");
+
+  ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+  ctx.font = "500 12px system-ui, sans-serif";
+  ctx.fillText("Commander MATE · Mememator", w / 2, h - 24);
+}
 
 export default function CommanderMateMemeGenerator() {
   const [faceIndex, setFaceIndex] = useState(0);
   const [feeling, setFeeling] = useState("");
   const [thinking, setThinking] = useState("");
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   const presetFeeling = feeling.trim() || "Chilling. NFA.";
   const presetThinking = thinking.trim() || "Just another day in the forge.";
+
+  // Auto-redraw preview when state changes
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    canvas.width = MEME_WIDTH;
+    canvas.height = MEME_HEIGHT;
+
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = CAPYBARA_FACES[faceIndex];
+    img.onload = () => {
+      setImgLoaded(true);
+      drawMeme(ctx, img, presetFeeling, presetThinking);
+    };
+  }, [faceIndex, presetFeeling, presetThinking]);
 
   const handleDownload = () => {
     const canvas = canvasRef.current;
@@ -35,60 +211,13 @@ export default function CommanderMateMemeGenerator() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const w = 400;
-    const h = 320;
-    canvas.width = w;
-    canvas.height = h;
-
-    // Dark space bg
-    ctx.fillStyle = "#0d0d14";
-    ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = "rgba(34, 211, 238, 0.08)";
-    ctx.fillRect(0, 0, w, h);
-
-    // Draw capybara face
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.src = CAPYBARA_FACES[faceIndex];
     img.onload = () => {
-      const faceSize = 140;
-      const faceX = w / 2 - faceSize / 2;
-      const faceY = h - faceSize - 40;
-      ctx.drawImage(img, faceX, faceY, faceSize, faceSize);
-
-      // Thought bubble - "feeling"
-      ctx.fillStyle = "rgba(255,255,255,0.95)";
-      ctx.strokeStyle = "rgba(34, 211, 238, 0.6)";
-      ctx.lineWidth = 2;
-      roundBubble(ctx, 24, 40, w - 48, 56, 12);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = "#0d0d14";
-      ctx.font = "bold 14px system-ui, sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      wrapText(ctx, presetFeeling, w / 2, 68, w - 64, 18);
-
-      // Thought bubble - "thinking"
-      ctx.fillStyle = "rgba(255,255,255,0.95)";
-      roundBubble(ctx, 24, 108, w - 48, 56, 12);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = "#0d0d14";
-      wrapText(ctx, presetThinking, w / 2, 136, w - 64, 18);
-
-      // Labels
-      ctx.fillStyle = "rgba(34, 211, 238, 0.9)";
-      ctx.font = "10px system-ui, sans-serif";
-      ctx.textAlign = "left";
-      ctx.fillText("Feeling:", 32, 32);
-      ctx.fillText("Thinking:", 32, 100);
-
-      // Branding
-      ctx.fillStyle = "rgba(255,255,255,0.5)";
-      ctx.font = "10px system-ui, sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText("Commander MATE · Mememator", w / 2, h - 12);
+      canvas.width = MEME_WIDTH;
+      canvas.height = MEME_HEIGHT;
+      drawMeme(ctx, img, presetFeeling, presetThinking);
 
       const a = document.createElement("a");
       a.download = `commander-mate-mood-${Date.now()}.png`;
@@ -97,149 +226,120 @@ export default function CommanderMateMemeGenerator() {
     };
   };
 
-  function roundBubble(
-    ctx: CanvasRenderingContext2D,
-    x: number,
-    y: number,
-    w: number,
-    h: number,
-    r: number
-  ) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
-  }
-
-  function wrapText(
-    ctx: CanvasRenderingContext2D,
-    text: string,
-    x: number,
-    y: number,
-    maxWidth: number,
-    lineHeight: number
-  ) {
-    const words = text.split(" ");
-    let line = "";
-    const lines: string[] = [];
-    ctx.font = "bold 14px system-ui, sans-serif";
-    for (const word of words) {
-      const test = line ? `${line} ${word}` : word;
-      const m = ctx.measureText(test);
-      if (m.width > maxWidth && line) {
-        lines.push(line);
-        line = word;
-      } else line = test;
-    }
-    if (line) lines.push(line);
-    const startY = y - ((lines.length - 1) * lineHeight) / 2;
-    lines.forEach((l, i) => {
-      ctx.fillText(l, x, startY + i * lineHeight);
-    });
-  }
-
   return (
-    <section className="border-t border-zinc-800/60 bg-zinc-950/50">
-      <canvas ref={canvasRef} className="sr-only" width={400} height={320} aria-hidden />
-      <div className="container-tight px-4 py-8 sm:px-6 sm:py-10">
-        <h2 className="mb-1 font-display text-lg font-semibold tracking-tight text-zinc-100 sm:text-xl">
-          What is Commander MATE feeling and thinking?
-        </h2>
-        <p className="mb-4 text-xs text-zinc-500 sm:text-sm">
-          Pick a capybara face, type what MATE is feeling and thinking. Download your meme.
-        </p>
+    <section className="border-t border-zinc-800/60 bg-gradient-to-b from-zinc-950/80 to-zinc-950/95">
+      <div className="container-tight px-4 py-10 sm:px-6 sm:py-14">
+        <div className="mb-10 text-center">
+          <h2 className="font-display text-2xl font-bold tracking-tight text-zinc-100 sm:text-3xl md:text-4xl">
+            What is Commander MATE feeling and thinking?
+          </h2>
+          <p className="mt-3 text-sm text-zinc-500 sm:text-base">
+            Pick a capybara face, type your vibes. Download and share.
+          </p>
+        </div>
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
-          <div className="shrink-0 space-y-3">
-            <label className="block text-[10px] font-medium uppercase text-zinc-500">Capybara face</label>
-            <div className="flex flex-wrap gap-1.5">
-              {CAPYBARA_FACES.map((src, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => setFaceIndex(i)}
-                  className={`h-10 w-10 overflow-hidden rounded border transition ${
-                    faceIndex === i ? "border-cyan-500 ring-1 ring-cyan-500/50" : "border-zinc-600 hover:border-zinc-500"
-                  }`}
-                >
-                  <img src={src} alt={`Face ${i + 1}`} className="h-full w-full object-cover" />
-                </button>
-              ))}
+        <div className="grid gap-10 xl:grid-cols-[340px_1fr] xl:gap-14">
+          {/* Controls */}
+          <div className="order-2 space-y-6 rounded-2xl border border-zinc-700/60 bg-zinc-900/50 p-6 sm:p-8 xl:order-1">
+            <div>
+              <label className="mb-3 block text-xs font-semibold uppercase tracking-wider text-cyan-400">
+                Capybara face
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {CAPYBARA_FACES.map((src, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setFaceIndex(i)}
+                    className={`h-11 w-11 overflow-hidden rounded-xl border-2 transition-all sm:h-12 sm:w-12 ${
+                      faceIndex === i
+                        ? "border-cyan-500 shadow-[0_0_20px_rgba(34,211,238,0.3)] ring-2 ring-cyan-400/30"
+                        : "border-zinc-600 hover:border-zinc-500 hover:scale-105"
+                    }`}
+                  >
+                    <img src={src} alt={`Face ${i + 1}`} className="h-full w-full object-cover" />
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div>
-              <label className="mb-1 block text-[10px] font-medium uppercase text-zinc-500">Feeling</label>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-cyan-400">
+                Feeling
+              </label>
               <input
                 type="text"
                 value={feeling}
                 onChange={(e) => setFeeling(e.target.value)}
                 placeholder="Chilling. NFA."
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/80 px-2.5 py-1.5 text-sm text-cyan-200 placeholder-zinc-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                className="w-full rounded-xl border-2 border-zinc-700 bg-zinc-800/80 px-4 py-3 text-base text-cyan-100 placeholder-zinc-500 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-[10px] font-medium uppercase text-zinc-500">Thinking</label>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-cyan-400">
+                Thinking
+              </label>
               <input
                 type="text"
                 value={thinking}
                 onChange={(e) => setThinking(e.target.value)}
                 placeholder="Just another day in the forge."
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-800/80 px-2.5 py-1.5 text-sm text-cyan-200 placeholder-zinc-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                className="w-full rounded-xl border-2 border-zinc-700 bg-zinc-800/80 px-4 py-3 text-base text-cyan-100 placeholder-zinc-500 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
               />
             </div>
 
-            <div className="flex flex-wrap gap-1.5">
-              {PRESET_FEELINGS.slice(0, 6).map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => setFeeling(p)}
-                  className="rounded-full bg-zinc-800 px-2 py-1 text-[10px] text-zinc-400 hover:bg-zinc-700 hover:text-cyan-400"
-                >
-                  {p}
-                </button>
-              ))}
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                Quick picks
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {PRESET_FEELINGS.slice(0, 8).map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setFeeling(p)}
+                    className="rounded-full border border-zinc-600 bg-zinc-800/80 px-3 py-2 text-xs text-zinc-300 transition hover:border-cyan-500/50 hover:bg-cyan-500/10 hover:text-cyan-400"
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
             </div>
+
+            <button
+              type="button"
+              onClick={handleDownload}
+              className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-600 px-6 py-4 text-base font-semibold text-zinc-950 shadow-lg transition hover:from-cyan-400 hover:to-cyan-500 hover:shadow-cyan-500/25"
+            >
+              Download meme
+            </button>
           </div>
 
-          <div className="min-w-0 flex-1">
-            <div className="overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900/80 p-4">
-              <div className="relative aspect-[400/320] max-w-[400px] mx-auto rounded-lg overflow-hidden border border-zinc-700">
-                <div className="absolute inset-0 bg-[#0d0d14]" />
-                <div className="absolute inset-0 bg-cyan-500/5" />
-                <img
-                  src={CAPYBARA_FACES[faceIndex]}
-                  alt="Commander MATE"
-                  className="absolute bottom-8 left-1/2 h-[140px] w-[140px] -translate-x-1/2 object-contain drop-shadow-lg"
-                />
-                <div className="absolute left-4 right-4 top-8 rounded-xl border border-cyan-500/30 bg-white/95 px-3 py-2 text-center">
-                  <span className="text-[10px] text-cyan-600">Feeling:</span>
-                  <p className="text-sm font-bold text-zinc-900">{presetFeeling}</p>
-                </div>
-                <div className="absolute left-4 right-4 top-24 rounded-xl border border-cyan-500/30 bg-white/95 px-3 py-2 text-center">
-                  <span className="text-[10px] text-cyan-600">Thinking:</span>
-                  <p className="text-sm font-bold text-zinc-900">{presetThinking}</p>
-                </div>
-                <p className="absolute bottom-2 left-0 right-0 text-center text-[10px] text-zinc-500">
-                  Commander MATE · Mememator
-                </p>
-              </div>
-              <div className="mt-3 flex justify-center">
-                <button
-                  type="button"
-                  onClick={handleDownload}
-                  className="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-zinc-950 hover:bg-cyan-400"
+          {/* Preview - large, prominent */}
+          <div className="order-1 flex min-w-0 flex-col items-center xl:order-2">
+            <div className="relative w-full max-w-[900px] min-w-0">
+              <div className="absolute -inset-2 rounded-2xl bg-gradient-to-r from-cyan-500/25 via-amber-500/10 to-cyan-500/25 opacity-70 blur-2xl" />
+              <div className="relative overflow-hidden rounded-2xl border-2 border-zinc-700/80 bg-zinc-900/95 shadow-2xl">
+                <div
+                  className="relative w-full overflow-hidden rounded-t-xl"
+                  style={{ aspectRatio: `${MEME_WIDTH} / ${MEME_HEIGHT}` }}
                 >
-                  Download meme
-                </button>
+                  <canvas
+                    ref={canvasRef}
+                    width={MEME_WIDTH}
+                    height={MEME_HEIGHT}
+                    className="block h-full w-full object-contain"
+                  />
+                  {!imgLoaded && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/80">
+                      <p className="text-sm text-zinc-500">Loading…</p>
+                    </div>
+                  )}
+                </div>
+                <p className="py-3 text-center text-xs text-zinc-500">
+                  Preview updates automatically as you type
+                </p>
               </div>
             </div>
           </div>
