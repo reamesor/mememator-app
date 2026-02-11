@@ -5,6 +5,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight, Zap } from "lucide-react";
 import LandingView from "./landing/LandingView";
+import SpaceCapybaraHero from "./home/SpaceCapybaraHero";
+import LoreSection from "./home/LoreSection";
 
 const HUB_URL = "/?hub=1";
 
@@ -128,24 +130,18 @@ export default function AppWithEntry() {
           </header>
 
           <div className="min-h-0 flex-1">
-          {/* Hero — bold statement (DGB-inspired) */}
-          <div className="relative border-b border-zinc-800/60 bg-gradient-to-b from-zinc-900/50 to-transparent">
-            <div className="container-tight px-4 py-8 sm:px-6 sm:py-14 md:py-16">
-              <p className="mb-3 text-center text-[10px] font-medium uppercase tracking-[0.35em] text-cyan-400/90 sm:text-xs">
-                Unapologetically degen
-              </p>
-              <h1 className="text-center text-xl font-semibold leading-tight tracking-tight text-white sm:text-2xl md:text-3xl">
-                Deploy the narrative.
-                <br />
-                <span className="text-cyan-400">Ignite the chart.</span>
-              </h1>
-              <p className="mt-4 text-center text-xs text-zinc-500 sm:text-sm">
-                Trends · Create · Launch. Pick a section below or use the menu above.
-              </p>
+          {/* Pure Linings: Commander MATE hero — homepage only */}
+          <SpaceCapybaraHero />
 
-              {/* Interactive purpose — brainrot / glitching / need profits / launch → Mememator saves the day */}
-              <PurposeBlock />
-            </div>
+          {/* Lore: The Legend of Commander MATE — homepage only */}
+          <LoreSection />
+
+          {/* Purpose block + tagline */}
+          <div className="container-tight px-4 pt-6 pb-4 sm:px-6">
+            <p className="text-center text-xs text-zinc-500 sm:text-sm">
+              Trends · Create · Launch. Pick a section below or use the menu above.
+            </p>
+            <PurposeBlock />
           </div>
 
           <div className="container-tight px-4 py-8 sm:px-6 sm:py-10">
