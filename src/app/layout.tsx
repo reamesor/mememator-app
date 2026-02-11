@@ -3,6 +3,7 @@ import "./globals.css";
 import { MateProvider } from "@/context/MateContext";
 import { ForgeDraftProvider } from "@/context/ForgeDraftContext";
 import InteractiveBackground from "@/components/ui/InteractiveBackground";
+import FloatingCapybaraFaces from "@/components/ui/FloatingCapybaraFaces";
 
 export const metadata: Metadata = {
   title: "Mememator $MATE — Solana Meme-to-Market Engine",
@@ -25,6 +26,7 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className="relative min-h-screen min-w-0 overflow-x-hidden antialiased">
         <InteractiveBackground />
+        <FloatingCapybaraFaces />
         <div className="relative z-10">
           <MateProvider>
             <ForgeDraftProvider>{children}</ForgeDraftProvider>

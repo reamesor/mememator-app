@@ -75,6 +75,8 @@ export default function KOLSection() {
   const [memeTemplate, setMemeTemplate] = useState<string>(templates[0]);
   const [visualStyle, setVisualStyle] = useState<VisualStyleTagId>("minimalist");
   const [vibe, setVibe] = useState<MemeSpectrumId>("shitpost_chaotic");
+  const [capybaraOverlay, setCapybaraOverlay] = useState<number | null>(null);
+  const capybaraImagesRef = useRef<Record<number, HTMLImageElement>>({});
 
   const formatTag = TEMPLATE_FORMAT_MAP[memeTemplate] ?? "image_macro";
   const formatLabel = FORMAT_TAGS.find((f) => f.id === formatTag)?.label ?? formatTag;
@@ -187,6 +189,24 @@ export default function KOLSection() {
       drawMemeText(ctx, captionToUse || "Your caption here", w / 2, h / 2, maxTextWidth, smallFont);
     }
 
+    // $MATE Capybara overlay (bottom-right, above watermark)
+    if (capybaraOverlay != null && capybaraOverlay >= 1 && capybaraOverlay <= 11) {
+      const img = capybaraImagesRef.current[capybaraOverlay];
+      if (img?.complete && img.naturalWidth) {
+        const size = 72;
+        const x = w - size - 12;
+        const y = h - 32 - size - 8;
+        ctx.drawImage(img, x, y, size, size);
+      } else if (!img) {
+        const nextImg = new Image();
+        nextImg.src = `/capybara-faces/capybara-${capybaraOverlay}.png`;
+        nextImg.onload = () => {
+          capybaraImagesRef.current[capybaraOverlay] = nextImg;
+          drawMeme();
+        };
+      }
+    }
+
     ctx.fillStyle = "rgba(0,0,0,0.5)";
     ctx.fillRect(0, h - 32, w, 32);
     ctx.fillStyle = "#64748b";
@@ -199,7 +219,7 @@ export default function KOLSection() {
 
   useEffect(() => {
     if (subject && (layout === "one_panel" ? captionToUse : true)) drawMeme();
-  }, [subject, captionToUse, topToUse, bottomToUse, memeTemplate, visualStyle, vibe, layout]);
+  }, [subject, captionToUse, topToUse, bottomToUse, memeTemplate, visualStyle, vibe, layout, capybaraOverlay]);
 
   const handleDownload = () => {
     const canvas = canvasRef.current;
@@ -563,6 +583,41 @@ export default function KOLSection() {
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div className="mb-3">
+              <label className="mb-1.5 block text-xs text-zinc-400">Add $MATE Capybara (sticker)</label>
+              <div className="flex flex-wrap gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setCapybaraOverlay(null)}
+                  className={`rounded border px-2 py-1 text-[10px] transition ${
+                    capybaraOverlay === null
+                      ? "border-cyan-500 bg-cyan-500/20 text-cyan-400"
+                      : "border-zinc-600 bg-zinc-800 text-zinc-400 hover:border-zinc-500"
+                  }`}
+                >
+                  None
+                </button>
+                {Array.from({ length: 11 }, (_, i) => i + 1).map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => setCapybaraOverlay(n)}
+                    className={`h-8 w-8 overflow-hidden rounded border transition ${
+                      capybaraOverlay === n
+                        ? "border-cyan-500 ring-1 ring-cyan-500/50"
+                        : "border-zinc-600 hover:border-zinc-500"
+                    }`}
+                  >
+                    <img
+                      src={`/capybara-faces/capybara-${n}.png`}
+                      alt={`Capybara ${n}`}
+                      className="h-full w-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="mb-3 rounded-lg border border-zinc-700 bg-zinc-800/80 p-2">

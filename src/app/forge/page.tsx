@@ -30,6 +30,8 @@ export default function ForgePage() {
   const [launchModalOpen, setLaunchModalOpen] = useState(false);
   const [droppedImage, setDroppedImage] = useState<string | null>(null);
 
+  const CAPYBARA_FACES = Array.from({ length: 11 }, (_, i) => `/capybara-faces/capybara-${i + 1}.png`);
+
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
@@ -187,6 +189,22 @@ export default function ForgePage() {
               )}
             </RetroCard>
           )}
+          <RetroCard className="space-y-3 p-3 sm:p-4">
+            <h2 className="font-pixel text-[10px] text-cyan-400">Capybara Faces</h2>
+            <p className="font-pixel text-[8px] text-zinc-500">Click to use as base image</p>
+            <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-5">
+              {CAPYBARA_FACES.map((src, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setDroppedImage(src)}
+                  className="aspect-square overflow-hidden rounded border border-zinc-700 hover:border-cyan-400/50 focus:border-cyan-400/50 focus:outline-none"
+                >
+                  <img src={src} alt={`Capybara ${i + 1}`} className="h-full w-full object-cover" />
+                </button>
+              ))}
+            </div>
+          </RetroCard>
           <RetroCard className="space-y-3 p-3 sm:p-4">
             <h2 className="font-pixel text-[10px] text-cyan-400">Style</h2>
             <div className="flex flex-wrap gap-1.5">

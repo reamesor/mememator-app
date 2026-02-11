@@ -108,6 +108,7 @@ export const memeAnimals: MemeSubjectOption[] = [
   { id: "fox", name: "Fox", theme: "Sly, alpha", suggestedCaption: "Missing the pump | 'I was early, you're late'" },
   { id: "rat", name: "Rat", theme: "Exit liquidity", suggestedCaption: "Thinking you're the smart money | You're the exit liquidity" },
   { id: "fish", name: "Fish", theme: "Whale / small fish", suggestedCaption: "Whales dumping | Me with 0.5 SOL still holding" },
+  { id: "capybara", name: "Capybara / $MATE", theme: "Chill, cyber-noir", suggestedCaption: "Pump.fun launching another animal | $MATE capybara just chilling" },
 ];
 
 /** Meme generator: symbols & vibes (rocket, moon, etc.) */
