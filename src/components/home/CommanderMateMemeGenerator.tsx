@@ -26,6 +26,65 @@ const PRESET_FEELINGS = [
 const MEME_WIDTH = 900;
 const MEME_HEIGHT = 600;
 
+const BACKGROUNDS = [
+  { id: "void", label: "Dark void" },
+  { id: "solana", label: "Solana" },
+  { id: "chart", label: "Chart green" },
+  { id: "sunset", label: "Sunset" },
+  { id: "cyber", label: "Cyber" },
+  { id: "ocean", label: "Ocean" },
+] as const;
+
+const CAPYBARA_POSITIONS = [
+  { id: "bottom-center", label: "Bottom center", x: 0.5, y: 0.92 },
+  { id: "bottom-left", label: "Bottom left", x: 0.2, y: 0.92 },
+  { id: "bottom-right", label: "Bottom right", x: 0.8, y: 0.92 },
+  { id: "center", label: "Center", x: 0.5, y: 0.55 },
+  { id: "center-left", label: "Center left", x: 0.2, y: 0.55 },
+  { id: "center-right", label: "Center right", x: 0.8, y: 0.55 },
+  { id: "top-left", label: "Top left", x: 0.2, y: 0.25 },
+  { id: "top-right", label: "Top right", x: 0.8, y: 0.25 },
+] as const;
+
+function drawBackground(ctx: CanvasRenderingContext2D, w: number, h: number, bgId: string) {
+  const g = ctx.createLinearGradient(0, 0, 0, h);
+  switch (bgId) {
+    case "solana":
+      g.addColorStop(0, "#9945FF");
+      g.addColorStop(0.4, "#14F195");
+      g.addColorStop(1, "#0a0a0f");
+      break;
+    case "chart":
+      g.addColorStop(0, "#0a0a0f");
+      g.addColorStop(0.4, "#166534");
+      g.addColorStop(1, "#15803d");
+      break;
+    case "sunset":
+      g.addColorStop(0, "#1a0a2e");
+      g.addColorStop(0.3, "#7c2d12");
+      g.addColorStop(0.6, "#ea580c");
+      g.addColorStop(1, "#050508");
+      break;
+    case "cyber":
+      g.addColorStop(0, "#0f172a");
+      g.addColorStop(0.5, "#1e293b");
+      g.addColorStop(1, "#020617");
+      break;
+    case "ocean":
+      g.addColorStop(0, "#0c4a6e");
+      g.addColorStop(0.4, "#0369a1");
+      g.addColorStop(0.8, "#0e7490");
+      g.addColorStop(1, "#050508");
+      break;
+    default:
+      g.addColorStop(0, "#0a0a0f");
+      g.addColorStop(0.5, "#0d0d14");
+      g.addColorStop(1, "#050508");
+  }
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+}
+
 function roundBubble(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -80,109 +139,120 @@ function drawMeme(
   ctx: CanvasRenderingContext2D,
   img: HTMLImageElement,
   feeling: string,
-  thinking: string
+  thinking: string,
+  backgroundId: string,
+  capybaraPos: { x: number; y: number }
 ) {
   const w = MEME_WIDTH;
   const h = MEME_HEIGHT;
+  const cx = w / 2;
 
-  // Rich gradient background
-  const bgGradient = ctx.createLinearGradient(0, 0, w, h);
-  bgGradient.addColorStop(0, "#0a0e1a");
-  bgGradient.addColorStop(0.3, "#0d1525");
-  bgGradient.addColorStop(0.6, "#0a121f");
-  bgGradient.addColorStop(1, "#050810");
-  ctx.fillStyle = bgGradient;
-  ctx.fillRect(0, 0, w, h);
+  // User-selected background
+  drawBackground(ctx, w, h, backgroundId);
 
-  // Glow overlay
-  const glow = ctx.createRadialGradient(w / 2, h * 0.6, 0, w / 2, h * 0.6, w * 0.8);
-  glow.addColorStop(0, "rgba(34, 211, 238, 0.08)");
-  glow.addColorStop(0.5, "rgba(34, 211, 238, 0.03)");
+  // Subtle circuit / grid accent (capybara vibe)
+  ctx.strokeStyle = "rgba(34, 211, 238, 0.04)";
+  ctx.lineWidth = 1;
+  const gridStep = 48;
+  for (let x = 0; x < w; x += gridStep) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, h);
+    ctx.stroke();
+  }
+  for (let y = 0; y < h; y += gridStep) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+  }
+
+  // Cyan / amber radial glow
+  const glow = ctx.createRadialGradient(cx, h * 0.7, 0, cx, h * 0.7, w * 0.7);
+  glow.addColorStop(0, "rgba(34, 211, 238, 0.06)");
+  glow.addColorStop(0.4, "rgba(251, 146, 60, 0.03)");
   glow.addColorStop(1, "transparent");
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, w, h);
 
-  // Capybara - larger, centered at bottom
-  const faceSize = 280;
-  const faceX = w / 2 - faceSize / 2;
-  const faceY = h - faceSize - 56;
+  // Capybara — positioned by user
+  const faceSize = 260;
+  const faceX = Math.max(0, Math.min(w - faceSize, w * capybaraPos.x - faceSize / 2));
+  const faceY = Math.max(0, Math.min(h - faceSize, h * capybaraPos.y - faceSize / 2));
+  ctx.shadowColor = "rgba(34, 211, 238, 0.25)";
+  ctx.shadowBlur = 40;
   ctx.drawImage(img, faceX, faceY, faceSize, faceSize);
-
-  // Thought bubbles - comic style with tails
-  const bubblePad = 48;
-  const bubbleW = w - bubblePad * 2;
-  const bubbleH = 88;
-  const gap = 20;
-  const bubbleY1 = 56;
-  const bubbleY2 = bubbleY1 + bubbleH + gap;
-
-  const bubbleRadius = 20;
-  const tailSize = 24;
-
-  ctx.shadowColor = "rgba(34, 211, 238, 0.15)";
-  ctx.shadowBlur = 24;
-
-  ctx.fillStyle = "rgba(255, 255, 255, 0.98)";
-  ctx.strokeStyle = "rgba(34, 211, 238, 0.6)";
-  ctx.lineWidth = 2;
-  roundBubble(ctx, bubblePad, bubbleY1, bubbleW, bubbleH, bubbleRadius);
-  ctx.fill();
-  ctx.stroke();
-
-  ctx.fillStyle = "rgba(255, 255, 255, 0.98)";
-  roundBubble(ctx, bubblePad, bubbleY2, bubbleW, bubbleH, bubbleRadius);
-  ctx.fill();
-  ctx.stroke();
-
   ctx.shadowBlur = 0;
 
-  // Bubble tail for top bubble (points toward capybara)
-  ctx.fillStyle = "rgba(255, 255, 255, 0.98)";
-  ctx.strokeStyle = "rgba(34, 211, 238, 0.6)";
-  ctx.beginPath();
-  ctx.moveTo(w / 2 - tailSize / 2, bubbleY1 + bubbleH);
-  ctx.lineTo(w / 2, bubbleY1 + bubbleH + tailSize);
-  ctx.lineTo(w / 2 + tailSize / 2, bubbleY1 + bubbleH);
-  ctx.closePath();
+  // Clean dark cards — zinc / glass, not white
+  const pad = 56;
+  const cardW = w - pad * 2;
+  const cardH = 90;
+  const gap = 16;
+  const cardY1 = 52;
+  const cardY2 = cardY1 + cardH + gap;
+
+  const radius = 12;
+
+  // Card 1: FEELING — clean dark zinc, cyan border
+  roundBubble(ctx, pad, cardY1, cardW, cardH, radius);
+  ctx.fillStyle = "rgba(39, 39, 42, 0.92)";
   ctx.fill();
+  ctx.strokeStyle = "rgba(34, 211, 238, 0.55)";
+  ctx.lineWidth = 1.5;
   ctx.stroke();
 
-  ctx.fillStyle = "rgba(255, 255, 255, 0.98)";
-  ctx.beginPath();
-  ctx.moveTo(w / 2 - tailSize / 2, bubbleY2 + bubbleH);
-  ctx.lineTo(w / 2, bubbleY2 + bubbleH + tailSize);
-  ctx.lineTo(w / 2 + tailSize / 2, bubbleY2 + bubbleH);
-  ctx.closePath();
+  // Card 2: THINKING — clean dark zinc, amber border
+  roundBubble(ctx, pad, cardY2, cardW, cardH, radius);
+  ctx.fillStyle = "rgba(39, 39, 42, 0.92)";
   ctx.fill();
+  ctx.strokeStyle = "rgba(251, 146, 60, 0.5)";
+  ctx.lineWidth = 1.5;
   ctx.stroke();
 
-  ctx.fillStyle = "#0a0e1a";
+  // Labels & text
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.font = "600 14px system-ui, sans-serif";
-  ctx.fillStyle = "rgba(34, 211, 238, 0.95)";
-  ctx.fillText("FEELING", w / 2, bubbleY1 + 28);
-  ctx.fillStyle = "#0a0e1a";
-  wrapText(ctx, feeling, w / 2, bubbleY1 + 60, bubbleW - 56, 26, 22, "700");
-  ctx.fillStyle = "rgba(34, 211, 238, 0.95)";
-  ctx.fillText("THINKING", w / 2, bubbleY2 + 28);
-  ctx.fillStyle = "#0a0e1a";
-  wrapText(ctx, thinking, w / 2, bubbleY2 + 60, bubbleW - 56, 26, 22, "700");
+  ctx.font = "600 11px JetBrains Mono, ui-monospace, monospace";
+  ctx.fillStyle = "#22d3ee";
+  ctx.fillText("FEELING", cx, cardY1 + 26);
+  ctx.fillStyle = "#e2e8f0";
+  ctx.font = "700 20px system-ui, sans-serif";
+  wrapText(ctx, feeling, cx, cardY1 + 58, cardW - 48, 26, 20, "700");
 
-  ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-  ctx.font = "500 12px system-ui, sans-serif";
-  ctx.fillText("Commander MATE · Mememator", w / 2, h - 24);
+  ctx.font = "600 11px JetBrains Mono, ui-monospace, monospace";
+  ctx.fillStyle = "#fb923c";
+  ctx.fillText("THINKING", cx, cardY2 + 26);
+  ctx.fillStyle = "#e2e8f0";
+  ctx.font = "700 20px system-ui, sans-serif";
+  wrapText(ctx, thinking, cx, cardY2 + 58, cardW - 48, 26, 20, "700");
+
+  // Watermark — Mememator $MATE style
+  ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+  ctx.fillRect(0, h - 40, w, 40);
+  ctx.fillStyle = "rgba(34, 211, 238, 0.9)";
+  ctx.font = "500 11px JetBrains Mono, ui-monospace, monospace";
+  ctx.fillText("Mememator", cx - 42, h - 20);
+  ctx.fillStyle = "#fb923c";
+  ctx.fillText("$MATE", cx + 2, h - 20);
+  ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+  ctx.fillText("· Commander", cx + 52, h - 20);
 }
 
 export default function CommanderMateMemeGenerator() {
   const [faceIndex, setFaceIndex] = useState(0);
   const [feeling, setFeeling] = useState("");
   const [thinking, setThinking] = useState("");
+  const [backgroundId, setBackgroundId] = useState<string>("void");
+  const [capybaraPosition, setCapybaraPosition] = useState<
+    (typeof CAPYBARA_POSITIONS)[number]
+  >(CAPYBARA_POSITIONS[0]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
 
   const presetFeeling = feeling.trim() || "Chilling. NFA.";
   const presetThinking = thinking.trim() || "Just another day in the forge.";
+  const capybaraPos = { x: capybaraPosition.x, y: capybaraPosition.y };
 
   // Auto-redraw preview when state changes
   useEffect(() => {
@@ -200,9 +270,9 @@ export default function CommanderMateMemeGenerator() {
     img.src = CAPYBARA_FACES[faceIndex];
     img.onload = () => {
       setImgLoaded(true);
-      drawMeme(ctx, img, presetFeeling, presetThinking);
+      drawMeme(ctx, img, presetFeeling, presetThinking, backgroundId, capybaraPos);
     };
-  }, [faceIndex, presetFeeling, presetThinking]);
+  }, [faceIndex, presetFeeling, presetThinking, backgroundId, capybaraPosition.id]);
 
   const handleDownload = () => {
     const canvas = canvasRef.current;
@@ -217,7 +287,7 @@ export default function CommanderMateMemeGenerator() {
     img.onload = () => {
       canvas.width = MEME_WIDTH;
       canvas.height = MEME_HEIGHT;
-      drawMeme(ctx, img, presetFeeling, presetThinking);
+      drawMeme(ctx, img, presetFeeling, presetThinking, backgroundId, capybaraPos);
 
       const a = document.createElement("a");
       a.download = `commander-mate-mood-${Date.now()}.png`;
@@ -241,6 +311,48 @@ export default function CommanderMateMemeGenerator() {
         <div className="grid gap-10 xl:grid-cols-[340px_1fr] xl:gap-14">
           {/* Controls */}
           <div className="order-2 space-y-6 rounded-2xl border border-zinc-700/60 bg-zinc-900/50 p-6 sm:p-8 xl:order-1">
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-cyan-400">
+                Background
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {BACKGROUNDS.map((b) => (
+                  <button
+                    key={b.id}
+                    type="button"
+                    onClick={() => setBackgroundId(b.id)}
+                    className={`rounded-lg border px-2.5 py-1.5 text-[11px] font-medium transition ${
+                      backgroundId === b.id
+                        ? "border-cyan-500 bg-cyan-500/20 text-cyan-400"
+                        : "border-zinc-600 bg-zinc-800 text-zinc-400 hover:border-zinc-500"
+                    }`}
+                  >
+                    {b.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-cyan-400">
+                Capybara position
+              </label>
+              <select
+                value={capybaraPosition.id}
+                onChange={(e) => {
+                  const pos = CAPYBARA_POSITIONS.find((p) => p.id === e.target.value);
+                  if (pos) setCapybaraPosition(pos);
+                }}
+                className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-xs text-zinc-200"
+              >
+                {CAPYBARA_POSITIONS.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div>
               <label className="mb-3 block text-xs font-semibold uppercase tracking-wider text-cyan-400">
                 Capybara face
@@ -319,8 +431,8 @@ export default function CommanderMateMemeGenerator() {
           {/* Preview - large, prominent */}
           <div className="order-1 flex min-w-0 flex-col items-center xl:order-2">
             <div className="relative w-full max-w-[900px] min-w-0">
-              <div className="absolute -inset-2 rounded-2xl bg-gradient-to-r from-cyan-500/25 via-amber-500/10 to-cyan-500/25 opacity-70 blur-2xl" />
-              <div className="relative overflow-hidden rounded-2xl border-2 border-zinc-700/80 bg-zinc-900/95 shadow-2xl">
+              <div className="absolute -inset-2 rounded-2xl bg-gradient-to-br from-cyan-500/20 via-zinc-800/50 to-amber-500/15 opacity-80 blur-2xl" />
+              <div className="relative overflow-hidden rounded-2xl border border-cyan-500/30 border-amber-500/20 bg-zinc-900/95 shadow-2xl shadow-cyan-500/5">
                 <div
                   className="relative w-full overflow-hidden rounded-t-xl"
                   style={{ aspectRatio: `${MEME_WIDTH} / ${MEME_HEIGHT}` }}
