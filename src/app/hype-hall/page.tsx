@@ -16,19 +16,19 @@ const MOCK_MEMES = [
 
 export default function HypeHallPage() {
   return (
-    <div className="min-h-screen bg-void-grid">
+    <div className="min-h-screen bg-void-grid-see-through">
       <BurnTicker />
 
       <header className="sticky top-0 z-30 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur">
-        <div className="container-tight flex h-14 items-center justify-between">
+        <div className="container-tight flex h-12 min-h-12 items-center justify-between gap-2">
           <Link
             href="/?hub=1"
-            className="flex items-center gap-2 font-pixel text-[10px] text-zinc-500 hover:text-zinc-300"
+            className="shrink-0 flex items-center gap-2 font-pixel text-xs text-zinc-500 hover:text-zinc-300 sm:text-sm"
           >
-            <ArrowLeft size={14} />
+            <ArrowLeft size={16} />
             Back to homepage
           </Link>
-          <div className="flex items-center gap-3 font-pixel text-[10px]">
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 font-pixel text-xs sm:text-sm">
             <span className="text-cyan-400">Hype Hall</span>
             <Link href="/ignition" className="text-zinc-400 hover:text-cyan-400 hover:underline">
               The Ignition
@@ -40,16 +40,16 @@ export default function HypeHallPage() {
         </div>
       </header>
 
-      <main className="container-tight flex min-h-[calc(100vh-52px-56px)] flex-col gap-4 p-4">
-        <RetroCard className="p-4">
+      <main className="container-tight flex min-h-[calc(100vh-7rem)] flex-col gap-3 p-3 sm:p-4">
+        <RetroCard className="p-3 sm:p-4">
           <h2 className="font-pixel text-[10px] text-cyan-400">Hype Hall</h2>
           <p className="mt-1 font-pixel text-[10px] text-zinc-400 sm:text-xs">
             Trending memes from the Forge. Based.
           </p>
         </RetroCard>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
           {MOCK_MEMES.map((m) => (
-            <RetroCard key={m.id} className="overflow-hidden p-4">
+            <RetroCard key={m.id} className="overflow-hidden p-3 sm:p-4">
               <div className="mb-3 flex aspect-video items-center justify-center rounded border border-zinc-800 bg-zinc-900">
                 <span className="font-pixel text-[8px] text-zinc-600">{m.ticker}</span>
               </div>

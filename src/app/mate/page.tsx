@@ -5,20 +5,20 @@ import { Flame, Lock, Zap, BadgeCheck } from "lucide-react";
 
 export default function MateInfoPage() {
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-zinc-950/95">
       <header className="sticky top-0 z-30 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-3 py-2 sm:px-4 sm:py-2.5">
+        <div className="mx-auto flex max-w-2xl items-center justify-between gap-2 px-3 py-2.5 sm:px-4">
           <Link
             href="/?hub=1"
-            className="text-xs font-medium text-zinc-500 hover:text-zinc-300 sm:text-sm"
+            className="min-h-[2.75rem] flex items-center text-sm font-medium text-zinc-500 hover:text-zinc-300"
           >
             ← Mememator
           </Link>
-          <span className="font-mono text-xs font-semibold text-cyan-400 sm:text-sm">$MATE</span>
+          <span className="font-mono text-sm font-semibold text-cyan-400">$MATE</span>
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-3 py-6 sm:px-4 sm:py-8">
+      <main className="mx-auto max-w-xl px-3 py-5 sm:px-4 sm:py-6 overflow-x-hidden">
         <h1 className="mb-1 font-display text-xl tracking-wide text-zinc-100 sm:text-2xl">
           $MATE Token
         </h1>

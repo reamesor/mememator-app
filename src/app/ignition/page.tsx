@@ -19,19 +19,19 @@ export default function IgnitionPage() {
   };
 
   return (
-    <div className="min-h-screen bg-void-grid">
+    <div className="min-h-screen bg-void-grid-see-through">
       <BurnTicker />
 
       <header className="sticky top-0 z-30 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur">
-        <div className="container-tight flex h-14 items-center justify-between">
+        <div className="container-tight flex h-12 min-h-12 items-center justify-between gap-2">
           <Link
             href="/?hub=1"
-            className="flex items-center gap-2 font-pixel text-[10px] text-zinc-500 hover:text-zinc-300"
+            className="flex items-center gap-2 font-pixel text-xs text-zinc-500 hover:text-zinc-300 sm:text-sm"
           >
-            <ArrowLeft size={14} />
+            <ArrowLeft size={16} />
             Back to homepage
           </Link>
-          <div className="flex items-center gap-3 font-pixel text-[10px]">
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 font-pixel text-xs sm:text-sm">
             <span className="text-cyan-400">The Ignition</span>
             <Link href="/forge" className="text-zinc-400 hover:text-cyan-400 hover:underline">
               The Forge
@@ -43,8 +43,8 @@ export default function IgnitionPage() {
         </div>
       </header>
 
-      <main className="container-tight flex min-h-[calc(100vh-52px-56px)] flex-col gap-4 p-4">
-        <RetroCard className="flex flex-col items-center justify-center py-10 sm:py-12">
+      <main className="container-tight flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center gap-3 px-3 py-6 sm:px-4 sm:py-10">
+        <RetroCard className="flex flex-col items-center justify-center p-4 py-6 sm:py-8">
           <h1 className="font-pixel mb-2 text-center text-[14px] text-zinc-100 sm:text-base md:text-lg">
             MEMEMATOR
           </h1>
@@ -60,11 +60,11 @@ export default function IgnitionPage() {
             The Forge. Create memes. Launch to Pump.fun. Based.
           </p>
 
-          <button
-            type="button"
-            onClick={isConnected ? () => router.push("/forge") : handleConnect}
-            className="flex items-center gap-2 rounded-lg border-2 border-cyan-400/60 bg-cyan-400/10 px-8 py-4 font-pixel text-xs text-cyan-400 transition hover:bg-cyan-400/20 sm:text-sm"
-          >
+        <button
+          type="button"
+          onClick={isConnected ? () => router.push("/forge") : handleConnect}
+          className="min-h-[3rem] flex items-center justify-center gap-2 rounded-lg border-2 border-cyan-400/60 bg-cyan-400/10 px-8 py-4 font-pixel text-xs text-cyan-400 transition hover:bg-cyan-400/20 sm:text-sm"
+        >
             <Wallet size={18} />
             {isConnected ? "Enter The Forge" : "Connect Wallet"}
           </button>

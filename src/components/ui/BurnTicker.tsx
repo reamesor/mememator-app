@@ -12,10 +12,10 @@ const MOCK_BURNS = [
 export default function BurnTicker() {
   const duplicate = [...MOCK_BURNS, ...MOCK_BURNS];
   return (
-    <div className="overflow-hidden border-y border-zinc-800 bg-zinc-950/90 py-2">
+    <div className="overflow-hidden border-y border-zinc-800 bg-zinc-950/90 py-1.5">
       <div className="flex animate-burn-ticker whitespace-nowrap text-cyan-400/90 font-pixel text-[10px] sm:text-xs">
         {duplicate.map((line, i) => (
-          <span key={i} className="mx-6">
+          <span key={i} className="mx-4">
             {line}
           </span>
         ))}

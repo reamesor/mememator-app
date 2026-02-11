@@ -37,9 +37,9 @@ function LandingContent({ onEnter, mounted }: { onEnter: () => void; mounted: bo
         </div>
       </header>
 
-      <main className="flex min-h-0 flex-1 flex-col items-center justify-center px-3 py-4 sm:px-4 sm:py-6">
+      <main className="flex min-h-0 flex-1 flex-col items-center justify-center px-4 py-6 sm:px-4 sm:py-6">
         <h1
-          className="mb-6 text-center font-display text-3xl tracking-wide text-white drop-shadow-lg sm:mb-8 sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl transition-transform duration-200 ease-out"
+          className="mb-6 text-center font-display text-2xl tracking-wide text-white drop-shadow-lg sm:mb-8 sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl transition-transform duration-200 ease-out"
           style={{ transform: `translate(${mx * tt}px, ${my * tt}px)` }}
         >
           Trends. Create. Launch.
@@ -51,7 +51,7 @@ function LandingContent({ onEnter, mounted }: { onEnter: () => void; mounted: bo
           <button
             type="button"
             onClick={onEnter}
-            className="group relative shrink-0 rounded-full bg-cyan-500/20 px-8 py-3 font-display text-base tracking-widest text-cyan-400 ring-1 ring-cyan-500/40 transition-all duration-200 hover:bg-cyan-500/30 hover:ring-cyan-400/60 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-cyan-400 sm:px-10 sm:py-4 sm:text-lg"
+            className="group relative min-h-[3rem] shrink-0 rounded-full bg-cyan-500/20 px-8 py-3 font-display text-base tracking-widest text-cyan-400 ring-1 ring-cyan-500/40 transition-all duration-200 hover:bg-cyan-500/30 hover:ring-cyan-400/60 hover:scale-105 active:scale-100 focus:outline-none focus:ring-2 focus:ring-cyan-400 sm:min-h-[3.25rem] sm:px-10 sm:py-4 sm:text-lg"
           >
             <span className="relative z-10">Enter</span>
             <span className="absolute inset-0 rounded-full bg-cyan-500/10 opacity-0 transition group-hover:opacity-100" />

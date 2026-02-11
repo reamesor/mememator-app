@@ -32,20 +32,20 @@ const UTILITY_CARDS = [
 
 export default function UtilityPage() {
   return (
-    <div className="min-h-screen bg-[#050505] text-white">
+    <div className="min-h-screen bg-[#050505]/95 text-white">
       <header className="sticky top-0 z-30 border-b border-[#333] bg-[#050505]/95 backdrop-blur">
-        <div className="mx-auto flex max-w-4xl items-center justify-between gap-2 px-3 py-2.5 sm:px-4">
+        <div className="mx-auto flex max-w-2xl items-center justify-between gap-2 px-3 py-2.5 sm:px-4">
           <Link
             href="/?hub=1"
-            className="text-xs font-medium text-[#888] hover:text-white transition"
+            className="min-h-[2.75rem] flex items-center text-sm font-medium text-[#888] hover:text-white transition"
           >
             ← Mememator
           </Link>
-          <span className="text-xs text-[#888]">Utility</span>
+          <span className="text-sm text-[#888]">Utility</span>
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-4 py-10 sm:py-12">
+      <main className="mx-auto max-w-xl px-3 py-6 sm:px-4 sm:py-10">
         {/* Section 1: The Manifesto */}
         <section className="mb-12 text-center">
           <h1
