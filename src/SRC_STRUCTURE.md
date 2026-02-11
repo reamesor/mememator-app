@@ -5,9 +5,8 @@
 | Route | Purpose |
 |-------|--------|
 | `/` | Home: globe landing → hub (AppWithEntry) |
-| `/hot` | Hot topics (Solana trends) |
+| `/hot` | Hot topics + shitcoins (trends & memecoins) |
 | `/pump` | Pump.fun launch info |
-| `/shitcoins` | Memecoin list |
 | `/lore` | Token lore & meme copy |
 | `/meme` | Meme generator (KOLs, templates) |
 | `/utility` | $MATE manifesto + utility grid (monochrome) |

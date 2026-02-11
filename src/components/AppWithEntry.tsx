@@ -12,9 +12,8 @@ import CommanderMateMemeGenerator from "./home/CommanderMateMemeGenerator";
 const HUB_URL = "/?hub=1";
 
 const HUB_LINKS = [
-  { href: "/hot", label: "Hot", summary: "What’s trending on Solana right now.", color: "orange" },
+  { href: "/hot", label: "Hot", summary: "Trends, hot topics & shitcoins on Solana.", color: "orange" },
   { href: "/pump", label: "Pump", summary: "Launch your token on Pump.fun.", color: "green" },
-  { href: "/shitcoins", label: "Shitcoins", summary: "Hot memecoins, mcap & volume.", color: "purple" },
   { href: "/lore", label: "Lore", summary: "Token narrative & meme angle for pump.fun.", color: "amber" },
   { href: "/meme", label: "Meme", summary: "Create meme images with KOLs & templates.", color: "cyan" },
   { href: "/utility", label: "Utility", summary: "$MATE manifesto & utility grid.", color: "rose" },
@@ -112,9 +111,6 @@ export default function AppWithEntry() {
                 <Link href="/pump" className="min-h-[2.75rem] min-w-[2.75rem] flex items-center justify-center rounded-full bg-green-500/20 px-3.5 py-2 text-xs font-semibold text-green-400 hover:bg-green-500/30 sm:text-sm">
                   Pump
                 </Link>
-                <Link href="/shitcoins" className="min-h-[2.75rem] min-w-[2.75rem] flex items-center justify-center rounded-full bg-purple-500/20 px-3.5 py-2 text-xs font-semibold text-purple-400 hover:bg-purple-500/30 sm:text-sm">
-                  Shitcoins
-                </Link>
                 <Link href="/lore" className="min-h-[2.75rem] min-w-[2.75rem] flex items-center justify-center rounded-full bg-amber-500/20 px-3.5 py-2 text-xs font-semibold text-amber-400 hover:bg-amber-500/30 sm:text-sm">
                   Lore
                 </Link>
@@ -134,6 +130,30 @@ export default function AppWithEntry() {
           <div className="min-h-0 flex-1">
           {/* Pure Linings: Commander MATE hero — homepage only */}
           <SpaceCapybaraHero />
+
+          {/* Why Mememator card — above legend */}
+          <div className="border-b border-zinc-800/60 bg-zinc-950/60">
+            <div className="container-tight px-4 py-8 sm:px-6 sm:py-10">
+              <div className="mx-auto max-w-2xl rounded-2xl border border-zinc-700/60 bg-zinc-900/50 p-5 sm:p-6">
+                <div className="flex items-center gap-2">
+                  <span className="text-cyan-400">
+                    <Zap className="h-5 w-5 sm:h-6 sm:w-6" />
+                  </span>
+                  <h2 className="font-semibold uppercase tracking-wider text-zinc-200 sm:text-lg">
+                    Why Mememator?
+                  </h2>
+                </div>
+                <p className="mt-4 text-sm leading-relaxed text-zinc-400 sm:text-base">
+                  Stop burning out on lore—just bank on the launch. We turn terminal brainrot into a professional forge
+                  where <span className="font-semibold text-cyan-400">chaos meets capital.</span>
+                </p>
+                <p className="mt-3 text-xs leading-relaxed text-zinc-500 sm:text-sm">
+                  <span className="text-cyan-400">Lore</span> → <span className="text-cyan-400">Meme</span> → <span className="text-cyan-400">Forge</span> → <span className="text-cyan-400">Pump</span>.
+                  Hot topics, KOL memes, token lore, capybara faces, one-click launch. We got you.
+                </p>
+              </div>
+            </div>
+          </div>
 
           {/* Lore: The Legend of Commander MATE — homepage only */}
           <LoreSection />
