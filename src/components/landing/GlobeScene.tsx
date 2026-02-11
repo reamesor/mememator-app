@@ -10,12 +10,6 @@ import { useMouse } from "./MouseContext";
 import { extend } from "@react-three/fiber";
 extend({ ThreeLine: THREE.Line });
 
-const WORLD_ORBS = [
-  { name: "Trends", color: "#22d3ee", emissive: "#0e7490", position: [1.8, 0.6, 0] as [number, number, number] },
-  { name: "Create", color: "#a78bfa", emissive: "#6d28d9", position: [-1.2, 1, 0] as [number, number, number] },
-  { name: "Launch", color: "#fbbf24", emissive: "#b45309", position: [-0.6, -1.4, 0] as [number, number, number] },
-];
-
 function Starfield() {
   const count = 2400;
   const positions = useMemo(() => {
@@ -48,63 +42,6 @@ function Starfield() {
   );
 }
 
-function WorldOrb({
-  color,
-  emissive,
-  position,
-  onClick,
-}: {
-  name: string;
-  color: string;
-  emissive: string;
-  position: [number, number, number];
-  onClick?: () => void;
-}) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const materialRef = useRef<THREE.MeshPhongMaterial>(null);
-  const hoverRef = useRef(false);
-
-  useFrame((_, delta) => {
-    if (meshRef.current) meshRef.current.rotation.y += delta * 0.15;
-    if (materialRef.current) {
-      const target = hoverRef.current ? 0.5 : 0.22;
-      materialRef.current.emissiveIntensity += (target - materialRef.current.emissiveIntensity) * 0.1;
-    }
-  });
-
-  return (
-    <group position={position}>
-      <mesh
-        ref={meshRef}
-        onClick={(e) => {
-          e.stopPropagation();
-          onClick?.();
-        }}
-        onPointerOver={() => {
-          hoverRef.current = true;
-          document.body.style.cursor = "pointer";
-        }}
-        onPointerOut={() => {
-          hoverRef.current = false;
-          document.body.style.cursor = "default";
-        }}
-      >
-        <sphereGeometry args={[0.42, 48, 48]} />
-        <meshPhongMaterial
-          ref={materialRef}
-          color={color}
-          emissive={emissive}
-          emissiveIntensity={0.22}
-          transparent
-          opacity={0.95}
-          side={THREE.FrontSide}
-          shininess={40}
-        />
-      </mesh>
-    </group>
-  );
-}
-
 function CursorReaction({
   mx,
   my,
@@ -130,16 +67,6 @@ function CursorReaction({
   return (
     <group ref={groupRef}>
       <Starfield />
-      {WORLD_ORBS.map((orb) => (
-        <WorldOrb
-          key={orb.name}
-          name={orb.name}
-          color={orb.color}
-          emissive={orb.emissive}
-          position={orb.position}
-          onClick={onGlobeClick}
-        />
-      ))}
     </group>
   );
 }

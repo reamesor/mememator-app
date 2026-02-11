@@ -42,17 +42,6 @@ function Star({ cx, cy, r, delay }: { cx: number; cy: number; r: number; delay: 
   );
 }
 
-function Planet({ cx, cy, r, hasRing }: { cx: number; cy: number; r: number; hasRing?: boolean }) {
-  return (
-    <g opacity={0.5}>
-      {hasRing && (
-        <ellipse cx={cx} cy={cy - 2} rx={r * 1.8} ry={r * 0.4} fill="none" stroke={STROKE_COLOR} strokeWidth={1} />
-      )}
-      <circle cx={cx} cy={cy} r={r} fill="none" stroke={STROKE_COLOR} strokeWidth={1.5} />
-    </g>
-  );
-}
-
 export default function FlyingCapybaraLayer({ onEnter }: { onEnter?: () => void }) {
   const { mx, my } = useMouse();
   const cursorOffset = { x: mx * CURSOR_PARALLAX, y: my * CURSOR_PARALLAX };
@@ -75,21 +64,6 @@ export default function FlyingCapybaraLayer({ onEnter }: { onEnter?: () => void 
           ].map(([cx, cy, r], i) => (
             <Star key={i} cx={cx} cy={cy} r={r} delay={i * 0.2} />
           ))}
-        </svg>
-      </motion.div>
-
-      {/* Parallax geometric planets */}
-      <motion.div
-        className="absolute inset-0"
-        initial={{ x: 0 }}
-        animate={{ x: ["0%", "5%", "0%"] }}
-        transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
-      >
-        <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid slice" viewBox="0 0 100 100">
-          <Planet cx={12} cy={25} r={4} hasRing />
-          <Planet cx={88} cy={75} r={3} />
-          <Planet cx={78} cy={20} r={2} />
-          <Planet cx={18} cy={70} r={2.5} hasRing />
         </svg>
       </motion.div>
       </div>

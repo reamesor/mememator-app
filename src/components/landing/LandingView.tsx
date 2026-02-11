@@ -42,27 +42,63 @@ function LandingContent({ onEnter, mounted }: { onEnter: () => void; mounted: bo
         </div>
       </header>
 
-      <main className="flex min-h-0 flex-1 flex-col items-center justify-center px-4 py-6 sm:px-4 sm:py-6">
+      <main className="relative flex min-h-0 flex-1 flex-col items-center justify-center px-4 py-6 sm:px-4 sm:py-6">
+        {/* Left side - floating capybaras */}
+        {[
+          { left: "8%", top: "25%", size: "w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20", duration: 2.8, delay: 0 },
+          { left: "4%", top: "55%", size: "w-10 h-10 sm:w-14 sm:h-14 md:w-18 md:h-18", duration: 3.2, delay: 0.5 },
+        ].map((p, i) => (
+          <motion.div
+            key={`left-${i}`}
+            className="absolute pointer-events-none"
+            style={{ left: p.left, top: p.top }}
+            animate={{ y: [0, -12, 0], rotate: [0, 2, -1, 0] }}
+            transition={{
+              duration: p.duration,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: p.delay,
+            }}
+          >
+            <CapybaraHead className={`${p.size} drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]`} />
+          </motion.div>
+        ))}
+        {/* Right side - floating capybaras */}
+        {[
+          { right: "8%", top: "30%", size: "w-11 h-11 sm:w-15 sm:h-15 md:w-20 md:h-20", duration: 3.1, delay: 0.3 },
+          { right: "5%", top: "60%", size: "w-14 h-14 sm:w-18 sm:h-18 md:w-24 md:h-24", duration: 2.6, delay: 0.7 },
+        ].map((p, i) => (
+          <motion.div
+            key={`right-${i}`}
+            className="absolute pointer-events-none"
+            style={{ right: p.right, top: p.top }}
+            animate={{ y: [0, 10, -6, 0], rotate: [0, -2, 1, 0] }}
+            transition={{
+              duration: p.duration,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: p.delay,
+            }}
+          >
+            <span className="inline-block scale-x-[-1]">
+              <CapybaraHead className={`${p.size} drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]`} />
+            </span>
+          </motion.div>
+        ))}
+        {/* Center: Trends. Create. Launch. - triangular layout (replacing the 3 circles) */}
         <div
-          className="mb-6 flex flex-wrap items-center justify-center gap-4 sm:mb-8 sm:gap-6 md:gap-8 transition-transform duration-200 ease-out"
+          className="mb-6 relative w-64 h-48 sm:w-80 sm:h-56 md:w-96 md:h-64 transition-transform duration-200 ease-out sm:mb-8"
           style={{ transform: `translate(${mx * tt}px, ${my * tt}px)` }}
         >
-          {[0, 1, 2].map((i) => (
-            <motion.div
-              key={i}
-              className="flex items-center justify-center"
-              animate={{ y: [0, -8, 0] }}
-              transition={{
-                duration: 2.5 + i * 0.4,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: i * 0.2,
-              }}
-              style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.6)) drop-shadow(0 0 12px rgba(255,255,255,0.15))" }}
-            >
-              <CapybaraHead className="w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 xl:w-48 xl:h-48" />
-            </motion.div>
-          ))}
+          <span className="absolute left-0 top-0 font-display text-xl font-semibold tracking-wide text-white drop-shadow-lg sm:text-3xl md:text-4xl lg:text-5xl">
+            Trends.
+          </span>
+          <span className="absolute right-0 top-0 font-display text-xl font-semibold tracking-wide text-white drop-shadow-lg sm:text-3xl md:text-4xl lg:text-5xl">
+            Create.
+          </span>
+          <span className="absolute left-1/2 bottom-0 -translate-x-1/2 font-display text-xl font-semibold tracking-wide text-white drop-shadow-lg sm:text-3xl md:text-4xl lg:text-5xl">
+            Launch.
+          </span>
         </div>
         <div
           className="transition-transform duration-150 ease-out pointer-events-auto"
