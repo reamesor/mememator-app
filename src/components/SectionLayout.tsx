@@ -9,9 +9,9 @@ type SectionLayoutProps = {
 
 export default function SectionLayout({ title, children }: SectionLayoutProps) {
   return (
-    <div className="min-h-screen bg-zinc-950/95">
+    <div className="min-h-screen bg-zinc-950/88">
       <header className="sticky top-0 z-30 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur">
-        <div className="mx-auto flex max-w-2xl items-center justify-between gap-2 px-3 py-2.5 sm:px-4">
+        <div className="container-tight flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <Link
             href="/?hub=1"
             className="min-h-[2.75rem] min-w-[2.75rem] flex items-center text-sm font-medium text-zinc-500 hover:text-zinc-300"
@@ -21,7 +21,7 @@ export default function SectionLayout({ title, children }: SectionLayoutProps) {
           <span className="text-sm text-zinc-500">{title}</span>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-2xl min-w-0 px-3 py-3 sm:px-4 sm:py-5">
+      <main className="container-tight w-full min-w-0 px-4 py-5 sm:px-6 sm:py-6">
         {children}
       </main>
     </div>

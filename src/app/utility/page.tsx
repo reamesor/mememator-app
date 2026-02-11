@@ -32,9 +32,9 @@ const UTILITY_CARDS = [
 
 export default function UtilityPage() {
   return (
-    <div className="min-h-screen bg-[#050505]/95 text-white">
+    <div className="min-h-screen bg-[#050505]/88 text-white">
       <header className="sticky top-0 z-30 border-b border-[#333] bg-[#050505]/95 backdrop-blur">
-        <div className="mx-auto flex max-w-2xl items-center justify-between gap-2 px-3 py-2.5 sm:px-4">
+        <div className="container-tight flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <Link
             href="/?hub=1"
             className="min-h-[2.75rem] flex items-center text-sm font-medium text-[#888] hover:text-white transition"
@@ -45,7 +45,7 @@ export default function UtilityPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-xl px-3 py-6 sm:px-4 sm:py-10">
+      <main className="container-tight px-4 py-8 sm:px-6 sm:py-12">
         {/* Section 1: The Manifesto */}
         <section className="mb-12 text-center">
           <h1

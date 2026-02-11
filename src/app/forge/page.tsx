@@ -96,9 +96,9 @@ export default function ForgePage() {
         </div>
       </header>
 
-      <main className="container-tight flex min-h-[calc(100vh-7rem)] flex-col gap-3 p-3 sm:p-4 lg:min-h-[calc(100vh-52px-56px)] lg:flex-row lg:gap-4">
+      <main className="container-tight flex min-h-[calc(100vh-7rem)] flex-col gap-4 p-4 sm:p-5 lg:min-h-[calc(100vh-52px-56px)] lg:flex-row lg:gap-6">
         {/* Left: Toolkit — order 1 on mobile */}
-        <aside className="order-1 w-full shrink-0 space-y-3 lg:order-none lg:w-56">
+        <aside className="order-1 w-full shrink-0 space-y-4 lg:order-none lg:w-60">
           {(loreDraft || memeDraft) && (
             <RetroCard className="space-y-2.5 p-3 sm:p-4">
               <h2 className="font-pixel text-[10px] text-cyan-400">Options from Lore & Meme</h2>
@@ -262,7 +262,7 @@ export default function ForgePage() {
         </section>
 
         {/* Right: Launchpad — order 3 on mobile */}
-        <aside className="order-3 w-full shrink-0 lg:order-none lg:w-64">
+        <aside className="order-3 w-full shrink-0 lg:order-none lg:w-72">
           <RetroCard className="space-y-3 p-3 sm:p-4">
             <h2 className="font-pixel text-[10px] text-cyan-400">Launchpad</h2>
             <div>

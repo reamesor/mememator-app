@@ -5,9 +5,9 @@ import { Flame, Lock, Zap, BadgeCheck } from "lucide-react";
 
 export default function MateInfoPage() {
   return (
-    <div className="min-h-screen bg-zinc-950/95">
+    <div className="min-h-screen bg-zinc-950/88">
       <header className="sticky top-0 z-30 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur">
-        <div className="mx-auto flex max-w-2xl items-center justify-between gap-2 px-3 py-2.5 sm:px-4">
+        <div className="container-tight flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <Link
             href="/?hub=1"
             className="min-h-[2.75rem] flex items-center text-sm font-medium text-zinc-500 hover:text-zinc-300"
@@ -18,7 +18,7 @@ export default function MateInfoPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-xl px-3 py-5 sm:px-4 sm:py-6 overflow-x-hidden">
+      <main className="container-tight px-4 py-6 sm:px-6 sm:py-8 overflow-x-hidden">
         <h1 className="mb-1 font-display text-xl tracking-wide text-zinc-100 sm:text-2xl">
           $MATE Token
         </h1>

@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { MateProvider } from "@/context/MateContext";
 import { ForgeDraftProvider } from "@/context/ForgeDraftContext";
-import DustBackground from "@/components/ui/DustBackground";
+import InteractiveBackground from "@/components/ui/InteractiveBackground";
 
 export const metadata: Metadata = {
   title: "Mememator $MATE — Solana Meme-to-Market Engine",
@@ -24,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="relative min-h-screen min-w-0 overflow-x-hidden antialiased">
-        <DustBackground />
+        <InteractiveBackground />
         <div className="relative z-10">
           <MateProvider>
             <ForgeDraftProvider>{children}</ForgeDraftProvider>

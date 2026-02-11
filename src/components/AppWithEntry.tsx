@@ -86,11 +86,11 @@ export default function AppWithEntry() {
   }
 
   return (
-    <div className="app-entry min-h-screen min-w-0 bg-zinc-950/95">
+    <div className="app-entry min-h-screen min-w-0 bg-zinc-950/88">
       <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto window-scroll">
         <main className="flex min-h-full min-w-0 flex-col">
           <header className="sticky top-0 z-30 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur px-3 py-3 sm:py-3.5">
-            <div className="mx-auto flex w-full max-w-2xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="container-tight flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-h-11 items-center justify-between gap-2 sm:shrink-0">
                 <button
                   type="button"
@@ -102,6 +102,13 @@ export default function AppWithEntry() {
                 </button>
               </div>
               <nav className="flex flex-wrap items-center justify-center gap-2 min-w-0">
+                <Link
+                  href={HUB_URL}
+                  className="min-h-[2.75rem] min-w-[2.75rem] flex items-center justify-center rounded-full border border-zinc-500/40 bg-zinc-600/30 px-3.5 py-2 text-xs font-semibold text-white hover:bg-zinc-500/40 sm:text-sm"
+                  title="Home"
+                >
+                  Home
+                </Link>
                 <Link href="/hot" className="min-h-[2.75rem] min-w-[2.75rem] flex items-center justify-center rounded-full bg-orange-500/20 px-3.5 py-2 text-xs font-semibold text-orange-400 hover:bg-orange-500/30 sm:text-sm">
                   Hot
                 </Link>
@@ -130,7 +137,7 @@ export default function AppWithEntry() {
           <div className="min-h-0 flex-1">
           {/* Hero — bold statement (DGB-inspired) */}
           <div className="relative border-b border-zinc-800/60 bg-gradient-to-b from-zinc-900/50 to-transparent">
-            <div className="mx-auto max-w-xl px-3 py-6 sm:px-4 sm:py-12 md:py-14">
+            <div className="container-tight px-4 py-8 sm:px-6 sm:py-14 md:py-16">
               <p className="mb-3 text-center text-[10px] font-medium uppercase tracking-[0.35em] text-cyan-400/90 sm:text-xs">
                 Unapologetically degen
               </p>
@@ -148,13 +155,13 @@ export default function AppWithEntry() {
             </div>
           </div>
 
-          <div className="mx-auto max-w-xl px-3 py-6 sm:px-4 sm:py-8">
-            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
+          <div className="container-tight px-4 py-8 sm:px-6 sm:py-10">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
               {HUB_LINKS.map(({ href, label, summary, color }) => (
                 <Link
                   key={href}
                   href={href}
-                  className={`group flex min-h-[3.5rem] items-center justify-between gap-2 rounded-xl border p-3 transition-all duration-200 active:scale-[0.99] hover:scale-[1.02] hover:shadow-lg sm:min-h-0 sm:p-4 ${colorClasses[color]}`}
+                  className={`group flex min-h-[3.5rem] items-center justify-between gap-3 rounded-xl border p-4 transition-all duration-200 active:scale-[0.99] hover:scale-[1.02] hover:shadow-lg sm:min-h-0 sm:p-5 ${colorClasses[color]}`}
                 >
                   <div className="min-w-0">
                     <span className="block text-sm font-semibold tracking-tight sm:text-base">{label}</span>
@@ -167,7 +174,7 @@ export default function AppWithEntry() {
           </div>
           </div>
 
-          <footer className="mt-auto border-t border-zinc-800/80 px-3 py-4 sm:py-6">
+          <footer className="mt-auto border-t border-zinc-800/80 px-4 py-5 sm:py-8">
             <p className="text-center text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-600 sm:text-xs">
               Mememator $MATE — Solana meme-to-market. NFA.
             </p>

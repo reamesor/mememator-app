@@ -40,14 +40,14 @@ export default function HypeHallPage() {
         </div>
       </header>
 
-      <main className="container-tight flex min-h-[calc(100vh-7rem)] flex-col gap-3 p-3 sm:p-4">
+      <main className="container-tight flex min-h-[calc(100vh-7rem)] flex-col gap-4 p-4 sm:p-5">
         <RetroCard className="p-3 sm:p-4">
           <h2 className="font-pixel text-[10px] text-cyan-400">Hype Hall</h2>
           <p className="mt-1 font-pixel text-[10px] text-zinc-400 sm:text-xs">
             Trending memes from the Forge. Based.
           </p>
         </RetroCard>
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
           {MOCK_MEMES.map((m) => (
             <RetroCard key={m.id} className="overflow-hidden p-3 sm:p-4">
               <div className="mb-3 flex aspect-video items-center justify-center rounded border border-zinc-800 bg-zinc-900">

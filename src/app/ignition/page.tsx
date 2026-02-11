@@ -43,7 +43,7 @@ export default function IgnitionPage() {
         </div>
       </header>
 
-      <main className="container-tight flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center gap-3 px-3 py-6 sm:px-4 sm:py-10">
+      <main className="container-tight flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center gap-4 px-4 py-8 sm:px-6 sm:py-12">
         <RetroCard className="flex flex-col items-center justify-center p-4 py-6 sm:py-8">
           <h1 className="font-pixel mb-2 text-center text-[14px] text-zinc-100 sm:text-base md:text-lg">
             MEMEMATOR
