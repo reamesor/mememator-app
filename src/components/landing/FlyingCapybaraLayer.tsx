@@ -3,30 +3,10 @@
 import { motion } from "framer-motion";
 import { useMouse } from "./MouseContext";
 
-/* Pure Linings: flying capybara + parallax for landing overlay */
+const CAPYBARA_FACES = Array.from({ length: 11 }, (_, i) => `/capybara-faces/capybara-${i + 1}.png`);
+
 const STROKE_COLOR = "#ffffff";
 const CURSOR_PARALLAX = 20;
-
-const CapybaraSVG = () => (
-  <svg
-    viewBox="0 0 200 120"
-    fill="none"
-    stroke={STROKE_COLOR}
-    strokeWidth={2.5}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="w-full h-full"
-    preserveAspectRatio="xMidYMid meet"
-  >
-    <path d="M 45 75 Q 25 70 22 55 Q 20 38 32 28 Q 42 20 55 22" />
-    <path d="M 55 22 L 62 16 Q 75 12 88 18 Q 95 24 92 32" />
-    <path d="M 92 32 Q 98 45 95 60 Q 90 78 75 85 Q 58 90 45 82 Q 35 78 32 65" />
-    <ellipse cx="75" cy="22" rx="16" ry="14" strokeWidth={2} />
-    <circle cx="68" cy="20" r="1.5" strokeWidth={2} />
-    <ellipse cx="40" cy="28" rx="6" ry="9" strokeWidth={2} />
-    <path d="M 22 55 L 15 62 M 28 58 L 22 66" strokeWidth={2} />
-  </svg>
-);
 
 function Star({ cx, cy, r, delay }: { cx: number; cy: number; r: number; delay: number }) {
   return (
@@ -96,9 +76,7 @@ export default function FlyingCapybaraLayer({ onEnter }: { onEnter?: () => void 
             title="Click Commander MATE to Enter"
           >
             <span className="absolute inset-0 -m-4 rounded-full bg-cyan-400/0 hover:bg-cyan-400/10 transition-colors duration-200 pointer-events-none" />
-            <span className="relative z-10" style={{ opacity: 0.9 }}>
-              <CapybaraSVG />
-            </span>
+            <img src={CAPYBARA_FACES[1]} alt="" className="relative z-10 h-full w-full object-contain drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]" style={{ opacity: 0.95 }} />
           </motion.button>
         </motion.div>
       </motion.div>
@@ -130,10 +108,43 @@ export default function FlyingCapybaraLayer({ onEnter }: { onEnter?: () => void 
             whileHover={{ scale: 1.2, opacity: 0.6 }}
             whileTap={{ scale: 0.95 }}
           >
-            <CapybaraSVG />
+            <img src={CAPYBARA_FACES[2]} alt="" className="h-full w-full object-contain drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]" />
           </motion.button>
         </motion.div>
       </motion.div>
+
+      {/* User's uploaded pixel-art capybara faces — chilling in outer space */}
+      {[
+        { left: "2%", top: "12%", size: 36, dur: 4.2, delay: 0 },
+        { right: "3%", top: "72%", size: 42, dur: 3.8, delay: 0.4 },
+        { left: "18%", top: "82%", size: 32, dur: 5, delay: 0.8 },
+        { right: "14%", top: "22%", size: 38, dur: 4.5, delay: 0.2 },
+        { left: "5%", top: "42%", size: 34, dur: 4.8, delay: 0.6 },
+      ].map((p, i) => (
+        <motion.div
+          key={`float-${i}`}
+          className="absolute pointer-events-none"
+          style={{
+            ...(p.left !== undefined ? { left: p.left } : { right: p.right }),
+            top: p.top,
+            width: p.size,
+            height: p.size,
+          }}
+          animate={{ y: [0, -6, 4, 0], rotate: [0, 1.5, -1, 0] }}
+          transition={{
+            duration: p.dur,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: p.delay,
+          }}
+        >
+          <img
+            src={CAPYBARA_FACES[i % CAPYBARA_FACES.length]}
+            alt=""
+            className="h-full w-full object-contain opacity-75 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]"
+          />
+        </motion.div>
+      ))}
     </div>
   );
 }

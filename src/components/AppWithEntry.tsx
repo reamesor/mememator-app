@@ -8,6 +8,7 @@ import LandingView from "./landing/LandingView";
 import CapybaraHead from "@/components/ui/CapybaraHead";
 import SpaceCapybaraHero from "./home/SpaceCapybaraHero";
 import LoreSection from "./home/LoreSection";
+import CommanderMateMemeGenerator from "./home/CommanderMateMemeGenerator";
 
 const HUB_URL = "/?hub=1";
 
@@ -137,6 +138,9 @@ export default function AppWithEntry() {
 
           {/* Lore: The Legend of Commander MATE — homepage only */}
           <LoreSection />
+
+          {/* What is Commander MATE feeling and thinking? — meme generator */}
+          <CommanderMateMemeGenerator />
 
           {/* Purpose block + tagline */}
           <div className="container-tight px-4 pt-6 pb-4 sm:px-6">

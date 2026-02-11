@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion";
 
+const CAPYBARA_FACES = Array.from({ length: 11 }, (_, i) => `/capybara-faces/capybara-${i + 1}.png`);
+
 /* Pure Linings: single continuous white vector line, 2–3px stroke on dark bg */
 
 const BG_COLOR = "#0d0d14"; /* Deep Solana purple-black */
@@ -143,6 +145,40 @@ export default function SpaceCapybaraHero() {
       >
         <CapybaraSVG />
       </motion.div>
+
+      {/* Floating pixel-art capybara faces — chilling in outer space */}
+      {[
+        { left: "4%", top: "18%", size: 40, dur: 4, delay: 0 },
+        { right: "6%", top: "75%", size: 44, dur: 4.5, delay: 0.3 },
+        { left: "12%", top: "85%", size: 36, dur: 3.8, delay: 0.6 },
+        { right: "16%", top: "28%", size: 38, dur: 4.2, delay: 0.2 },
+        { left: "22%", top: "45%", size: 32, dur: 5, delay: 0.5 },
+        { right: "8%", top: "52%", size: 34, dur: 4.3, delay: 0.4 },
+      ].map((p, i) => (
+        <motion.div
+          key={`float-${i}`}
+          className="absolute pointer-events-none z-10"
+          style={{
+            ...(p.left !== undefined ? { left: p.left } : { right: p.right }),
+            top: p.top,
+            width: p.size,
+            height: p.size,
+          }}
+          animate={{ y: [0, -8, 5, 0], rotate: [0, 2, -1, 0] }}
+          transition={{
+            duration: p.dur,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: p.delay,
+          }}
+        >
+          <img
+            src={CAPYBARA_FACES[i % CAPYBARA_FACES.length]}
+            alt=""
+            className="h-full w-full object-contain opacity-80 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]"
+          />
+        </motion.div>
+      ))}
 
       {/* Pure Linings branding */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

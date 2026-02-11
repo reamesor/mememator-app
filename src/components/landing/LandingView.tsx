@@ -5,7 +5,8 @@ import { motion } from "framer-motion";
 import { MouseProvider, useMouse } from "./MouseContext";
 import GlobeScene from "./GlobeScene";
 import FlyingCapybaraLayer from "./FlyingCapybaraLayer";
-import CapybaraHead from "@/components/ui/CapybaraHead";
+
+const CAPYBARA_FACES = Array.from({ length: 11 }, (_, i) => `/capybara-faces/capybara-${i + 1}.png`);
 
 const PARALLAX = { title: 14, button: 8 };
 
@@ -32,18 +33,18 @@ function LandingContent({ onEnter, mounted }: { onEnter: () => void; mounted: bo
       <header className="shrink-0 overflow-hidden px-0 pt-4 sm:pt-8 md:pt-12">
         <div className="flex animate-header-slide whitespace-nowrap items-center gap-3">
           <span className="font-display text-lg tracking-[0.2em] text-white sm:text-xl md:text-2xl pr-[2em] flex items-center gap-2">
-            <CapybaraHead className="w-6 h-6 sm:w-8 sm:h-8 shrink-0" />
+            <img src={CAPYBARA_FACES[0]} alt="" className="w-6 h-6 sm:w-8 sm:h-8 shrink-0 object-contain" />
             MEMEMATOR · $MATE · SOLANA
           </span>
           <span className="font-display text-lg tracking-[0.2em] text-white sm:text-xl md:text-2xl pr-[2em] flex items-center gap-2" aria-hidden>
-            <CapybaraHead className="w-6 h-6 sm:w-8 sm:h-8 shrink-0" />
+            <img src={CAPYBARA_FACES[0]} alt="" className="w-6 h-6 sm:w-8 sm:h-8 shrink-0 object-contain" />
             MEMEMATOR · $MATE · SOLANA
           </span>
         </div>
       </header>
 
       <main className="relative flex min-h-0 flex-1 flex-col items-center justify-center px-4 py-6 sm:px-4 sm:py-6">
-        {/* Left side - floating capybaras */}
+        {/* Left side - floating capybara faces (uploaded pixel-art) chilling in space */}
         {[
           { left: "8%", top: "25%", size: "w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20", duration: 2.8, delay: 0 },
           { left: "4%", top: "55%", size: "w-10 h-10 sm:w-14 sm:h-14 md:w-18 md:h-18", duration: 3.2, delay: 0.5 },
@@ -60,10 +61,10 @@ function LandingContent({ onEnter, mounted }: { onEnter: () => void; mounted: bo
               delay: p.delay,
             }}
           >
-            <CapybaraHead className={`${p.size} drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]`} />
+            <img src={CAPYBARA_FACES[i % CAPYBARA_FACES.length]} alt="" className={`${p.size} object-contain opacity-85 drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]`} />
           </motion.div>
         ))}
-        {/* Right side - floating capybaras */}
+        {/* Right side - floating capybara faces (uploaded pixel-art) chilling in space */}
         {[
           { right: "8%", top: "30%", size: "w-11 h-11 sm:w-15 sm:h-15 md:w-20 md:h-20", duration: 3.1, delay: 0.3 },
           { right: "5%", top: "60%", size: "w-14 h-14 sm:w-18 sm:h-18 md:w-24 md:h-24", duration: 2.6, delay: 0.7 },
@@ -80,9 +81,7 @@ function LandingContent({ onEnter, mounted }: { onEnter: () => void; mounted: bo
               delay: p.delay,
             }}
           >
-            <span className="inline-block scale-x-[-1]">
-              <CapybaraHead className={`${p.size} drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]`} />
-            </span>
+            <img src={CAPYBARA_FACES[(i + 2) % CAPYBARA_FACES.length]} alt="" className={`${p.size} object-contain opacity-85 drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)] scale-x-[-1]`} />
           </motion.div>
         ))}
         {/* Center: Trends. Create. Launch. - single line, centered, glow */}
