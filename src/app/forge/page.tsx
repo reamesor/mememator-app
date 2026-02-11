@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Lock, Sparkles, X } from "lucide-react";
+import CapybaraHead from "@/components/ui/CapybaraHead";
 import BurnTicker from "@/components/ui/BurnTicker";
 import ChaosSlider from "@/components/ui/ChaosSlider";
 import RetroCard from "@/components/ui/RetroCard";
@@ -69,6 +70,7 @@ export default function ForgePage() {
             href="/?hub=1"
             className="min-h-[2.75rem] shrink-0 flex items-center gap-2 rounded px-2 py-2 font-pixel text-xs text-zinc-500 hover:text-zinc-300 sm:text-sm"
           >
+            <CapybaraHead className="w-5 h-5 shrink-0" />
             <ArrowLeft size={16} />
             <span className="sm:hidden">Back</span>
             <span className="hidden sm:inline">Back to homepage</span>

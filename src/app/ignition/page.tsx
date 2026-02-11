@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Wallet } from "lucide-react";
+import CapybaraHead from "@/components/ui/CapybaraHead";
 import BurnTicker from "@/components/ui/BurnTicker";
 import IgnitionHero from "@/components/landing/IgnitionHero";
 import RetroCard from "@/components/ui/RetroCard";
@@ -28,6 +29,7 @@ export default function IgnitionPage() {
             href="/?hub=1"
             className="flex items-center gap-2 font-pixel text-xs text-zinc-500 hover:text-zinc-300 sm:text-sm"
           >
+            <CapybaraHead className="w-5 h-5 shrink-0" />
             <ArrowLeft size={16} />
             Back to homepage
           </Link>

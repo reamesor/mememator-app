@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight, Zap } from "lucide-react";
 import LandingView from "./landing/LandingView";
+import CapybaraHead from "@/components/ui/CapybaraHead";
 import SpaceCapybaraHero from "./home/SpaceCapybaraHero";
 import LoreSection from "./home/LoreSection";
 
@@ -97,9 +98,10 @@ export default function AppWithEntry() {
                 <button
                   type="button"
                   onClick={goToLanding}
-                  className="min-h-[2.75rem] min-w-[2.75rem] shrink-0 rounded px-3 py-2 text-xs font-medium text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300 transition sm:text-sm"
+                  className="min-h-[2.75rem] min-w-[2.75rem] shrink-0 flex items-center gap-2 rounded px-3 py-2 text-xs font-medium text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300 transition sm:text-sm"
                   title="Back to globe"
                 >
+                  <CapybaraHead className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
                   ← Globe
                 </button>
               </div>
@@ -164,7 +166,8 @@ export default function AppWithEntry() {
           </div>
 
           <footer className="mt-auto border-t border-zinc-800/80 px-4 py-5 sm:py-8">
-            <p className="text-center text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-600 sm:text-xs">
+            <p className="flex items-center justify-center gap-2 text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-600 sm:text-xs">
+              <CapybaraHead className="w-4 h-4 shrink-0" />
               Mememator $MATE — Solana meme-to-market. NFA.
             </p>
           </footer>

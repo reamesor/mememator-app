@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Flame, Lock, Zap, BadgeCheck } from "lucide-react";
+import CapybaraHead from "@/components/ui/CapybaraHead";
 
 export default function MateInfoPage() {
   return (
@@ -10,8 +11,9 @@ export default function MateInfoPage() {
         <div className="container-tight flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <Link
             href="/?hub=1"
-            className="min-h-[2.75rem] flex items-center text-sm font-medium text-zinc-500 hover:text-zinc-300"
+            className="min-h-[2.75rem] flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-zinc-300"
           >
+            <CapybaraHead className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
             ← Mememator
           </Link>
           <span className="font-mono text-sm font-semibold text-cyan-400">$MATE</span>
