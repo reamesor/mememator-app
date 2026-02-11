@@ -42,7 +42,6 @@ const BACKGROUNDS = [
   { id: "neon_mesh", label: "Neon mesh" },
   { id: "ocean_depth", label: "Ocean depth" },
   { id: "aurora", label: "Aurora" },
-  { id: "ai_style", label: "AI-style (procedural)" },
   { id: "upload", label: "Upload your own" },
 ] as const;
 
@@ -110,27 +109,6 @@ function drawBackground(
       g.addColorStop(0.8, "#134e4a");
       g.addColorStop(1, "#0d0d14");
       break;
-    case "ai_style": {
-      const g1 = ctx.createRadialGradient(w * 0.2, h * 0.2, 0, w, h, w * 0.8);
-      g1.addColorStop(0, "#3b0764");
-      g1.addColorStop(0.3, "#581c87");
-      g1.addColorStop(0.6, "#0f172a");
-      g1.addColorStop(1, "#020617");
-      ctx.fillStyle = g1;
-      ctx.fillRect(0, 0, w, h);
-      const g2 = ctx.createRadialGradient(w * 0.8, h * 0.3, 0, w * 0.5, h, w * 0.6);
-      g2.addColorStop(0, "rgba(34, 211, 238, 0.15)");
-      g2.addColorStop(0.5, "rgba(34, 211, 238, 0.05)");
-      g2.addColorStop(1, "transparent");
-      ctx.fillStyle = g2;
-      ctx.fillRect(0, 0, w, h);
-      const g3 = ctx.createRadialGradient(w * 0.3, h * 0.7, 0, w * 0.5, h * 0.5, w * 0.5);
-      g3.addColorStop(0, "rgba(251, 146, 60, 0.08)");
-      g3.addColorStop(1, "transparent");
-      ctx.fillStyle = g3;
-      ctx.fillRect(0, 0, w, h);
-      return;
-    }
     default:
       ctx.fillStyle = "#0d0d14";
       ctx.fillRect(0, 0, w, h);
@@ -144,6 +122,21 @@ const TRENDING_OPTIONS = [
   ...hotTopics.slice(0, 6).map((t) => ({ type: "hot" as const, id: t.id, label: t.title.slice(0, 36) + (t.title.length > 36 ? "…" : ""), faceIndex: (parseInt(t.id, 10) % 11) + 1 })),
   ...memecoinTrends.slice(0, 6).map((m, i) => ({ type: "memecoin" as const, id: m.id, label: `${m.symbol} — ${m.theme}`, faceIndex: (i % 11) + 1 })),
 ];
+
+const TEXT_POSITIONS = [
+  { id: "left", label: "Left", align: "left" as const },
+  { id: "center", label: "Center", align: "center" as const },
+  { id: "right", label: "Right", align: "right" as const },
+] as const;
+
+const MEME_FONTS = [
+  { id: "impact", label: "Impact", font: 'Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif' },
+  { id: "arial_black", label: "Arial Black", font: '"Arial Black", Arial, sans-serif' },
+  { id: "comic", label: "Comic Sans", font: '"Comic Sans MS", cursive' },
+  { id: "georgia", label: "Georgia", font: "Georgia, serif" },
+  { id: "verdana", label: "Verdana", font: "Verdana, sans-serif" },
+  { id: "trebuchet", label: "Trebuchet", font: '"Trebuchet MS", sans-serif' },
+] as const;
 
 /** Two-panel = top (reject/bad) + bottom (approve/good). One-panel = single caption. */
 const TEMPLATE_LAYOUT: Record<TemplateId, "two_panel" | "one_panel"> = {
@@ -208,6 +201,10 @@ export default function KOLSection() {
   const [mainCharacterCapybara, setMainCharacterCapybara] = useState<number>(1);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [trendingOption, setTrendingOption] = useState<{ type: "hot" | "memecoin"; id: string } | null>(null);
+  const [topTextPosition, setTopTextPosition] = useState<"left" | "center" | "right">("center");
+  const [bottomTextPosition, setBottomTextPosition] = useState<"left" | "center" | "right">("center");
+  const [captionPosition, setCaptionPosition] = useState<"left" | "center" | "right">("center");
+  const [fontId, setFontId] = useState<string>("impact");
 
   const formatTag = TEMPLATE_FORMAT_MAP[memeTemplate] ?? "image_macro";
   const formatLabel = FORMAT_TAGS.find((f) => f.id === formatTag)?.label ?? formatTag;
@@ -269,9 +266,10 @@ export default function KOLSection() {
     y: number,
     maxWidth: number,
     fontSize: number,
-    align: "center" | "left" = "center"
+    fontFamily: string,
+    align: "left" | "center" | "right"
   ) {
-    const font = `bold ${fontSize}px Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif`;
+    const font = `bold ${fontSize}px ${fontFamily}`;
     const lines = wrapText(ctx, text.toUpperCase(), maxWidth, font);
     const lineHeight = fontSize * 1.15;
     const startY = y - (lines.length - 1) * (lineHeight / 2);
@@ -289,6 +287,13 @@ export default function KOLSection() {
     });
     ctx.textAlign = "center";
     ctx.textBaseline = "alphabetic";
+  }
+
+  function getTextX(w: number, align: "left" | "center" | "right"): number {
+    const pad = 24;
+    if (align === "left") return pad;
+    if (align === "right") return w - pad;
+    return w / 2;
   }
 
   const drawMeme = () => {
@@ -363,12 +368,13 @@ export default function KOLSection() {
     const maxTextWidth = w - padding * 2;
     const bigFont = 42;
     const smallFont = 28;
+    const fontFamily = MEME_FONTS.find((f) => f.id === fontId)?.font ?? MEME_FONTS[0].font;
 
     if (isTwoPanel) {
-      drawMemeText(ctx, topToUse, w / 2, panelH * 0.5, maxTextWidth, bigFont);
-      drawMemeText(ctx, bottomToUse, w / 2, panelH + panelH * 0.5, maxTextWidth, bigFont);
+      drawMemeText(ctx, topToUse, getTextX(w, topTextPosition), panelH * 0.5, maxTextWidth, bigFont, fontFamily, topTextPosition);
+      drawMemeText(ctx, bottomToUse, getTextX(w, bottomTextPosition), panelH + panelH * 0.5, maxTextWidth, bigFont, fontFamily, bottomTextPosition);
     } else {
-      drawMemeText(ctx, captionToUse || "Your caption here", w / 2, h / 2, maxTextWidth, smallFont);
+      drawMemeText(ctx, captionToUse || "Your caption here", getTextX(w, captionPosition), h / 2, maxTextWidth, smallFont, fontFamily, captionPosition);
     }
 
     // $MATE Capybara overlay (bottom-right, above watermark)
@@ -401,7 +407,7 @@ export default function KOLSection() {
 
   useEffect(() => {
     if (subject && (layout === "one_panel" ? captionToUse : true)) drawMeme();
-  }, [subject, captionToUse, topToUse, bottomToUse, memeTemplate, visualStyle, vibe, layout, capybaraOverlay, backgroundId, mainCharacterMode, mainCharacterCapybara, uploadedImage, trendingOption, backgroundUpload]);
+  }, [subject, captionToUse, topToUse, bottomToUse, memeTemplate, visualStyle, vibe, layout, capybaraOverlay, backgroundId, mainCharacterMode, mainCharacterCapybara, uploadedImage, trendingOption, backgroundUpload, topTextPosition, bottomTextPosition, captionPosition, fontId]);
 
   const handleDownload = () => {
     const canvas = canvasRef.current;
@@ -775,7 +781,7 @@ export default function KOLSection() {
             </div>
 
             <div className="mb-3">
-              <label className="mb-1.5 block text-xs font-medium text-zinc-400">Main character</label>
+              <label className="mb-1.5 block text-xs font-medium text-zinc-400">Images — Main character</label>
               <div className="flex flex-wrap gap-2">
                 {(["template", "capybara", "upload", "trending"] as const).map((mode) => (
                   <button
@@ -917,7 +923,66 @@ export default function KOLSection() {
             </div>
 
             <div className="mb-3">
-              <label className="mb-1.5 block text-xs text-zinc-400">Add $MATE Capybara (sticker)</label>
+              <label className="mb-1.5 block text-xs font-medium text-zinc-400">Font</label>
+              <select
+                value={fontId}
+                onChange={(e) => setFontId(e.target.value)}
+                className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-xs text-zinc-200"
+              >
+                {MEME_FONTS.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="mb-3">
+              <label className="mb-1.5 block text-xs font-medium text-zinc-400">
+                Text position {layout === "two_panel" ? "(top)" : "(caption)"}
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {TEXT_POSITIONS.map((p) => {
+                  const isTop = layout === "two_panel";
+                  const selected = isTop ? topTextPosition === p.id : captionPosition === p.id;
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => (isTop ? setTopTextPosition(p.id) : setCaptionPosition(p.id))}
+                      className={`rounded-lg border px-2.5 py-1.5 text-xs font-medium transition ${
+                        selected ? "border-cyan-500 bg-cyan-500/20 text-cyan-400" : "border-zinc-600 bg-zinc-800 text-zinc-400 hover:border-zinc-500"
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {layout === "two_panel" && (
+              <div className="mb-3">
+                <label className="mb-1.5 block text-xs font-medium text-zinc-400">Text position (bottom)</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {TEXT_POSITIONS.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => setBottomTextPosition(p.id)}
+                      className={`rounded-lg border px-2.5 py-1.5 text-xs font-medium transition ${
+                        bottomTextPosition === p.id ? "border-cyan-500 bg-cyan-500/20 text-cyan-400" : "border-zinc-600 bg-zinc-800 text-zinc-400 hover:border-zinc-500"
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="mb-3">
+              <label className="mb-1.5 block text-xs font-medium text-zinc-400">Add $MATE Capybara (sticker)</label>
               <div className="flex flex-wrap gap-1.5">
                 <button
                   type="button"

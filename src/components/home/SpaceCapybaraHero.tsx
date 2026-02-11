@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const CAPYBARA_FACES = Array.from({ length: 11 }, (_, i) => `/capybara-faces/capybara-${i + 1}.png`);
 
@@ -23,25 +23,30 @@ function Star({ cx, cy, r, delay }: { cx: number; cy: number; r: number; delay: 
   );
 }
 
-function useMouse() {
-  const [mouse, setMouse] = useState({ x: 0.5, y: 0.5 });
-  useEffect(() => {
-    const handle = (e: MouseEvent) => {
-      setMouse({
-        x: e.clientX / window.innerWidth,
-        y: e.clientY / window.innerHeight,
-      });
-    };
-    window.addEventListener("mousemove", handle);
-    return () => window.removeEventListener("mousemove", handle);
-  }, []);
-  return mouse;
-}
-
 export default function SpaceCapybaraHero() {
-  const mouse = useMouse();
-  const glowX = mouse.x * 100;
-  const glowY = mouse.y * 100;
+  const [spawnedCapybaras, setSpawnedCapybaras] = useState<
+    Array<{ id: number; left?: string; right?: string; top: string; size: number; faceIdx: number }>
+  >([]);
+
+  const handleCapybaraClick = useCallback(() => {
+    const spots = [
+      { left: "12%" as const, top: "18%", size: 32 },
+      { right: "12%" as const, top: "22%", size: 28 },
+      { left: "8%" as const, top: "72%", size: 30 },
+      { right: "10%" as const, top: "68%", size: 26 },
+    ];
+    const pick = spots[Math.floor(Math.random() * spots.length)];
+    const id = Date.now() + Math.random();
+    const newOne = {
+      id,
+      ...pick,
+      faceIdx: Math.floor(Math.random() * 11),
+    };
+    setSpawnedCapybaras((prev) => [...prev.slice(-4), newOne]);
+    setTimeout(() => {
+      setSpawnedCapybaras((prev) => prev.filter((c) => c.id !== id));
+    }, 2500);
+  }, []);
 
   /* Only 6 capybaras — corners & far edges, small & subtle. Center stays clear. */
   const capybaraSpots: Array<{
@@ -83,11 +88,11 @@ export default function SpaceCapybaraHero() {
         </svg>
       </motion.div>
 
-      {/* Cursor-following glow — soft, behind content */}
+      {/* Fixed center glow — draws focus to text */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-30 transition-opacity duration-300 group-hover/hero:opacity-50"
+        className="pointer-events-none absolute inset-0 opacity-40"
         style={{
-          background: `radial-gradient(ellipse 35% 35% at ${glowX}% ${glowY}%, rgba(34,211,238,0.2) 0%, transparent 70%)`,
+          background: "radial-gradient(ellipse 45% 40% at 50% 45%, rgba(34,211,238,0.18) 0%, transparent 70%)",
         }}
         aria-hidden
       />
@@ -101,11 +106,14 @@ export default function SpaceCapybaraHero() {
         aria-hidden
       />
 
-      {/* Minimal floating capybaras — edges only */}
+      {/* Interactive floating capybaras — hover zoom, click spawns more */}
       {capybaraSpots.map((p) => (
-        <motion.div
+        <motion.button
           key={`float-${p.i}`}
-          className="absolute pointer-events-none z-0 opacity-40"
+          type="button"
+          onClick={handleCapybaraClick}
+          title="Click for more capybaras"
+          className="absolute z-[5] cursor-pointer touch-manipulation"
           style={{
             ...(p.left != null ? { left: p.left } : { right: p.right }),
             top: p.top,
@@ -119,14 +127,42 @@ export default function SpaceCapybaraHero() {
             ease: "easeInOut",
             delay: p.delay,
           }}
+          whileHover={{ scale: 1.45, opacity: 0.95, transition: { duration: 0.2 } }}
+          whileTap={{ scale: 0.9, transition: { duration: 0.1 } }}
         >
           <img
             src={CAPYBARA_FACES[p.i % CAPYBARA_FACES.length]}
             alt=""
-            className="h-full w-full object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]"
+            className="h-full w-full object-contain opacity-75 drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)] transition-opacity hover:opacity-100"
           />
-        </motion.div>
+        </motion.button>
       ))}
+
+      {/* Spawned capybaras — appear on click, fade out after 2.5s */}
+      <AnimatePresence>
+        {spawnedCapybaras.map((c) => (
+          <motion.div
+            key={c.id}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 0.7 }}
+            exit={{ scale: 0.5, opacity: 0 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="absolute pointer-events-none z-[4]"
+            style={{
+              ...(c.left != null ? { left: c.left } : { right: c.right }),
+              top: c.top,
+              width: c.size,
+              height: c.size,
+            }}
+          >
+            <img
+              src={CAPYBARA_FACES[c.faceIdx]}
+              alt=""
+              className="h-full w-full object-contain drop-shadow-[0_4px_16px_rgba(34,211,238,0.3)]"
+            />
+          </motion.div>
+        ))}
+      </AnimatePresence>
 
       {/* Hero content — interactive typography */}
       <div className="relative z-10 flex min-h-[min(55vh,380px)] items-center justify-center px-4">

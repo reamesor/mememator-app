@@ -308,128 +308,9 @@ export default function CommanderMateMemeGenerator() {
           </p>
         </div>
 
-        <div className="grid gap-10 xl:grid-cols-[340px_1fr] xl:gap-14">
-          {/* Controls */}
-          <div className="order-2 space-y-6 rounded-2xl border border-zinc-700/60 bg-zinc-900/50 p-6 sm:p-8 xl:order-1">
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-cyan-400">
-                Background
-              </label>
-              <div className="flex flex-wrap gap-1.5">
-                {BACKGROUNDS.map((b) => (
-                  <button
-                    key={b.id}
-                    type="button"
-                    onClick={() => setBackgroundId(b.id)}
-                    className={`rounded-lg border px-2.5 py-1.5 text-[11px] font-medium transition ${
-                      backgroundId === b.id
-                        ? "border-cyan-500 bg-cyan-500/20 text-cyan-400"
-                        : "border-zinc-600 bg-zinc-800 text-zinc-400 hover:border-zinc-500"
-                    }`}
-                  >
-                    {b.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-cyan-400">
-                Capybara position
-              </label>
-              <select
-                value={capybaraPosition.id}
-                onChange={(e) => {
-                  const pos = CAPYBARA_POSITIONS.find((p) => p.id === e.target.value);
-                  if (pos) setCapybaraPosition(pos);
-                }}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-xs text-zinc-200"
-              >
-                {CAPYBARA_POSITIONS.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="mb-3 block text-xs font-semibold uppercase tracking-wider text-cyan-400">
-                Capybara face
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {CAPYBARA_FACES.map((src, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => setFaceIndex(i)}
-                    className={`h-11 w-11 overflow-hidden rounded-xl border-2 transition-all sm:h-12 sm:w-12 ${
-                      faceIndex === i
-                        ? "border-cyan-500 shadow-[0_0_20px_rgba(34,211,238,0.3)] ring-2 ring-cyan-400/30"
-                        : "border-zinc-600 hover:border-zinc-500 hover:scale-105"
-                    }`}
-                  >
-                    <img src={src} alt={`Face ${i + 1}`} className="h-full w-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-cyan-400">
-                Feeling
-              </label>
-              <input
-                type="text"
-                value={feeling}
-                onChange={(e) => setFeeling(e.target.value)}
-                placeholder="Chilling. NFA."
-                className="w-full rounded-xl border-2 border-zinc-700 bg-zinc-800/80 px-4 py-3 text-base text-cyan-100 placeholder-zinc-500 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-cyan-400">
-                Thinking
-              </label>
-              <input
-                type="text"
-                value={thinking}
-                onChange={(e) => setThinking(e.target.value)}
-                placeholder="Just another day in the forge."
-                className="w-full rounded-xl border-2 border-zinc-700 bg-zinc-800/80 px-4 py-3 text-base text-cyan-100 placeholder-zinc-500 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                Quick picks
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {PRESET_FEELINGS.slice(0, 8).map((p) => (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => setFeeling(p)}
-                    className="rounded-full border border-zinc-600 bg-zinc-800/80 px-3 py-2 text-xs text-zinc-300 transition hover:border-cyan-500/50 hover:bg-cyan-500/10 hover:text-cyan-400"
-                  >
-                    {p}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleDownload}
-              className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-600 px-6 py-4 text-base font-semibold text-zinc-950 shadow-lg transition hover:from-cyan-400 hover:to-cyan-500 hover:shadow-cyan-500/25"
-            >
-              Download meme
-            </button>
-          </div>
-
-          {/* Preview - large, prominent */}
-          <div className="order-1 flex min-w-0 flex-col items-center xl:order-2">
+        <div className="flex flex-col gap-8">
+          {/* Preview first */}
+          <div className="flex min-w-0 flex-col items-center">
             <div className="relative w-full max-w-[900px] min-w-0">
               <div className="absolute -inset-2 rounded-2xl bg-gradient-to-br from-cyan-500/20 via-zinc-800/50 to-amber-500/15 opacity-80 blur-2xl" />
               <div className="relative overflow-hidden rounded-2xl border border-cyan-500/30 border-amber-500/20 bg-zinc-900/95 shadow-2xl shadow-cyan-500/5">
@@ -454,6 +335,127 @@ export default function CommanderMateMemeGenerator() {
                 </p>
               </div>
             </div>
+          </div>
+
+          {/* Controls below preview */}
+          <div className="rounded-2xl border border-zinc-700/60 bg-zinc-900/50 p-4 sm:p-5">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div>
+                <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-cyan-400">
+                  Background
+                </label>
+                <div className="flex flex-wrap gap-1">
+                  {BACKGROUNDS.map((b) => (
+                    <button
+                      key={b.id}
+                      type="button"
+                      onClick={() => setBackgroundId(b.id)}
+                      className={`rounded border px-2 py-1 text-[10px] font-medium transition ${
+                        backgroundId === b.id
+                          ? "border-cyan-500 bg-cyan-500/20 text-cyan-400"
+                          : "border-zinc-600 bg-zinc-800 text-zinc-400 hover:border-zinc-500"
+                      }`}
+                    >
+                      {b.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-cyan-400">
+                  Capybara position
+                </label>
+                <select
+                  value={capybaraPosition.id}
+                  onChange={(e) => {
+                    const pos = CAPYBARA_POSITIONS.find((p) => p.id === e.target.value);
+                    if (pos) setCapybaraPosition(pos);
+                  }}
+                  className="w-full rounded border border-zinc-700 bg-zinc-800 px-2 py-1.5 text-xs text-zinc-200"
+                >
+                  {CAPYBARA_POSITIONS.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-cyan-400">
+                Capybara face
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {CAPYBARA_FACES.map((src, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setFaceIndex(i)}
+                    className={`h-9 w-9 overflow-hidden rounded-lg border-2 transition-all ${
+                      faceIndex === i
+                        ? "border-cyan-500 shadow-[0_0_12px_rgba(34,211,238,0.25)] ring-1 ring-cyan-400/30"
+                        : "border-zinc-600 hover:border-zinc-500 hover:scale-105"
+                    }`}
+                  >
+                    <img src={src} alt={`Face ${i + 1}`} className="h-full w-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-cyan-400">
+                  Feeling
+                </label>
+                <input
+                  type="text"
+                  value={feeling}
+                  onChange={(e) => setFeeling(e.target.value)}
+                  placeholder="Chilling. NFA."
+                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800/80 px-3 py-2 text-sm text-cyan-100 placeholder-zinc-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/30"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-cyan-400">
+                  Thinking
+                </label>
+                <input
+                  type="text"
+                  value={thinking}
+                  onChange={(e) => setThinking(e.target.value)}
+                  placeholder="Just another day in the forge."
+                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800/80 px-3 py-2 text-sm text-cyan-100 placeholder-zinc-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/30"
+                />
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                Quick picks
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {PRESET_FEELINGS.slice(0, 8).map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setFeeling(p)}
+                    className="shrink-0 rounded-full border border-zinc-600 bg-zinc-800/80 px-2.5 py-1.5 text-[11px] text-zinc-300 transition hover:border-cyan-500/50 hover:bg-cyan-500/10 hover:text-cyan-400"
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleDownload}
+              className="mt-5 w-full rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-600 px-4 py-3 text-sm font-semibold text-zinc-950 shadow-lg transition hover:from-cyan-400 hover:to-cyan-500 hover:shadow-cyan-500/25"
+            >
+              Download meme
+            </button>
           </div>
         </div>
       </div>
