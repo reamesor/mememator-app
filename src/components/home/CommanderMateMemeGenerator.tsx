@@ -35,16 +35,7 @@ const BACKGROUNDS = [
   { id: "ocean", label: "Ocean" },
 ] as const;
 
-const CAPYBARA_POSITIONS = [
-  { id: "bottom-center", label: "Bottom center", x: 0.5, y: 0.92 },
-  { id: "bottom-left", label: "Bottom left", x: 0.2, y: 0.92 },
-  { id: "bottom-right", label: "Bottom right", x: 0.8, y: 0.92 },
-  { id: "center", label: "Center", x: 0.5, y: 0.55 },
-  { id: "center-left", label: "Center left", x: 0.2, y: 0.55 },
-  { id: "center-right", label: "Center right", x: 0.8, y: 0.55 },
-  { id: "top-left", label: "Top left", x: 0.2, y: 0.25 },
-  { id: "top-right", label: "Top right", x: 0.8, y: 0.25 },
-] as const;
+const DEFAULT_POSITION = { x: 0.2, y: 0.92 } as const;
 
 function drawBackground(ctx: CanvasRenderingContext2D, w: number, h: number, bgId: string) {
   const g = ctx.createLinearGradient(0, 0, 0, h);
@@ -244,15 +235,11 @@ export default function CommanderMateMemeGenerator() {
   const [feeling, setFeeling] = useState("");
   const [thinking, setThinking] = useState("");
   const [backgroundId, setBackgroundId] = useState<string>("void");
-  const [capybaraPosition, setCapybaraPosition] = useState<
-    (typeof CAPYBARA_POSITIONS)[number]
-  >(CAPYBARA_POSITIONS[0]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
 
   const presetFeeling = feeling.trim() || "Chilling. NFA.";
   const presetThinking = thinking.trim() || "Just another day in the forge.";
-  const capybaraPos = { x: capybaraPosition.x, y: capybaraPosition.y };
 
   // Auto-redraw preview when state changes
   useEffect(() => {
@@ -270,9 +257,9 @@ export default function CommanderMateMemeGenerator() {
     img.src = CAPYBARA_FACES[faceIndex];
     img.onload = () => {
       setImgLoaded(true);
-      drawMeme(ctx, img, presetFeeling, presetThinking, backgroundId, capybaraPos);
+      drawMeme(ctx, img, presetFeeling, presetThinking, backgroundId, DEFAULT_POSITION);
     };
-  }, [faceIndex, presetFeeling, presetThinking, backgroundId, capybaraPosition.id]);
+  }, [faceIndex, presetFeeling, presetThinking, backgroundId]);
 
   const handleDownload = () => {
     const canvas = canvasRef.current;
@@ -287,7 +274,7 @@ export default function CommanderMateMemeGenerator() {
     img.onload = () => {
       canvas.width = MEME_WIDTH;
       canvas.height = MEME_HEIGHT;
-      drawMeme(ctx, img, presetFeeling, presetThinking, backgroundId, capybaraPos);
+      drawMeme(ctx, img, presetFeeling, presetThinking, backgroundId, DEFAULT_POSITION);
 
       const a = document.createElement("a");
       a.download = `commander-mate-mood-${Date.now()}.png`;
@@ -304,7 +291,7 @@ export default function CommanderMateMemeGenerator() {
             What is Commander MATE feeling and thinking?
           </h2>
           <p className="mt-3 text-sm text-zinc-500 sm:text-base">
-            Pick a capybara face, type your vibes. Download and share.
+            Pick a Commander MATE face, type your vibes. Download and share.
           </p>
         </div>
 
@@ -339,52 +326,31 @@ export default function CommanderMateMemeGenerator() {
 
           {/* Controls below preview */}
           <div className="rounded-2xl border border-zinc-700/60 bg-zinc-900/50 p-4 sm:p-5">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              <div>
-                <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-cyan-400">
-                  Background
-                </label>
-                <div className="flex flex-wrap gap-1">
-                  {BACKGROUNDS.map((b) => (
-                    <button
-                      key={b.id}
-                      type="button"
-                      onClick={() => setBackgroundId(b.id)}
-                      className={`rounded border px-2 py-1 text-[10px] font-medium transition ${
-                        backgroundId === b.id
-                          ? "border-cyan-500 bg-cyan-500/20 text-cyan-400"
-                          : "border-zinc-600 bg-zinc-800 text-zinc-400 hover:border-zinc-500"
-                      }`}
-                    >
-                      {b.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-cyan-400">
-                  Capybara position
-                </label>
-                <select
-                  value={capybaraPosition.id}
-                  onChange={(e) => {
-                    const pos = CAPYBARA_POSITIONS.find((p) => p.id === e.target.value);
-                    if (pos) setCapybaraPosition(pos);
-                  }}
-                  className="w-full rounded border border-zinc-700 bg-zinc-800 px-2 py-1.5 text-xs text-zinc-200"
-                >
-                  {CAPYBARA_POSITIONS.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.label}
-                    </option>
-                  ))}
-                </select>
+            <div>
+              <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-cyan-400">
+                Background
+              </label>
+              <div className="flex flex-wrap gap-1">
+                {BACKGROUNDS.map((b) => (
+                  <button
+                    key={b.id}
+                    type="button"
+                    onClick={() => setBackgroundId(b.id)}
+                    className={`rounded border px-2 py-1 text-[10px] font-medium transition ${
+                      backgroundId === b.id
+                        ? "border-cyan-500 bg-cyan-500/20 text-cyan-400"
+                        : "border-zinc-600 bg-zinc-800 text-zinc-400 hover:border-zinc-500"
+                    }`}
+                  >
+                    {b.label}
+                  </button>
+                ))}
               </div>
             </div>
 
             <div className="mt-4">
               <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-cyan-400">
-                Capybara face
+                Commander MATE face
               </label>
               <div className="flex flex-wrap gap-1.5">
                 {CAPYBARA_FACES.map((src, i) => (

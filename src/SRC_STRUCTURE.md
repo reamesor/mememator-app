@@ -9,6 +9,7 @@
 | `/pump` | Pump.fun launch info |
 | `/lore` | Token lore & meme copy |
 | `/meme` | Meme generator (KOLs, templates) |
+| `/tweets` | Tweet content for token launches |
 | `/utility` | $MATE manifesto + utility grid (monochrome) |
 | `/mate` | $MATE token info + launchpad links |
 | `/ignition` | The Ignition (connect → Forge) |

@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const CAPYBARA_FACES = Array.from({ length: 11 }, (_, i) => `/capybara-faces/capybara-${i + 1}.png`);
 
-const BG_COLOR = "#0d0d14";
 const STROKE_COLOR = "#ffffff";
 
 function Star({ cx, cy, r, delay }: { cx: number; cy: number; r: number; delay: number }) {
@@ -68,9 +67,22 @@ export default function SpaceCapybaraHero() {
 
   return (
     <section
-      className="group/hero relative overflow-hidden border-b border-zinc-800/60"
-      style={{ backgroundColor: BG_COLOR, minHeight: "min(55vh, 380px)" }}
+      className="group/hero relative overflow-hidden border-b border-cyan-500/20"
+      style={{
+        minHeight: "min(55vh, 380px)",
+        background: "linear-gradient(165deg, #0a0a0f 0%, #0d0d14 35%, #0a0a12 70%, #050508 100%)",
+      }}
     >
+      {/* Subtle grid overlay — cyber/terminal vibe */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.06]"
+        style={{
+          backgroundImage: "linear-gradient(rgba(34,211,238,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.4) 1px, transparent 1px)",
+          backgroundSize: "32px 32px",
+        }}
+        aria-hidden
+      />
+
       {/* Ambient stars — fewer, slower */}
       <motion.div
         className="pointer-events-none absolute inset-0"
@@ -88,20 +100,33 @@ export default function SpaceCapybaraHero() {
         </svg>
       </motion.div>
 
-      {/* Fixed center glow — draws focus to text */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-40"
+      {/* Cyan–amber center glow — site signature colors */}
+      <motion.div
+        className="pointer-events-none absolute inset-0"
+        initial={{ opacity: 0.5 }}
+        animate={{ opacity: [0.5, 0.75, 0.5] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
         style={{
-          background: "radial-gradient(ellipse 45% 40% at 50% 45%, rgba(34,211,238,0.18) 0%, transparent 70%)",
+          background: "radial-gradient(ellipse 55% 45% at 50% 45%, rgba(34,211,238,0.25) 0%, rgba(251,191,36,0.08) 40%, transparent 70%)",
         }}
         aria-hidden
       />
 
-      {/* Subtle center vignette — draws focus to text */}
+      {/* Bottom accent line — cyan glow */}
+      <div
+        className="pointer-events-none absolute bottom-0 left-0 right-0 h-px opacity-60"
+        style={{
+          background: "linear-gradient(90deg, transparent 0%, rgba(34,211,238,0.6) 30%, rgba(251,191,36,0.4) 50%, rgba(34,211,238,0.6) 70%, transparent 100%)",
+          boxShadow: "0 0 20px rgba(34,211,238,0.2)",
+        }}
+        aria-hidden
+      />
+
+      {/* Corner vignettes — darker edges */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
-          background: "radial-gradient(ellipse 70% 60% at 50% 45%, transparent 0%, rgba(0,0,0,0.35) 100%)",
+          background: "radial-gradient(ellipse 80% 70% at 50% 50%, transparent 0%, rgba(0,0,0,0.4) 100%)",
         }}
         aria-hidden
       />
@@ -113,7 +138,7 @@ export default function SpaceCapybaraHero() {
           type="button"
           onClick={handleCapybaraClick}
           title="Click for more capybaras"
-          className="absolute z-[5] cursor-pointer touch-manipulation"
+          className="absolute z-[5] cursor-pointer touch-manipulation rounded-full transition-[box-shadow] duration-200 hover:shadow-[0_0_20px_rgba(34,211,238,0.35)]"
           style={{
             ...(p.left != null ? { left: p.left } : { right: p.right }),
             top: p.top,
@@ -133,7 +158,7 @@ export default function SpaceCapybaraHero() {
           <img
             src={CAPYBARA_FACES[p.i % CAPYBARA_FACES.length]}
             alt=""
-            className="h-full w-full object-contain opacity-75 drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)] transition-opacity hover:opacity-100"
+            className="h-full w-full object-contain opacity-80 drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)] transition-opacity hover:opacity-100"
           />
         </motion.button>
       ))}
@@ -171,7 +196,7 @@ export default function SpaceCapybaraHero() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.5 }}
-            className="text-[10px] font-medium uppercase tracking-[0.45em] sm:tracking-[0.55em] text-white/60"
+            className="text-[10px] font-medium uppercase tracking-[0.45em] sm:tracking-[0.55em] text-cyan-400/80"
           >
             Pure Linings
           </motion.p>
@@ -181,16 +206,16 @@ export default function SpaceCapybaraHero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.6 }}
             whileHover={{ scale: 1.02 }}
-            className="mt-3 font-semibold tracking-tight sm:mt-4"
+            className="mt-3 font-bold tracking-tight sm:mt-4"
             style={{
               fontSize: "clamp(1.75rem, 5vw, 3rem)",
             }}
           >
-            <span
-              className="bg-gradient-to-r from-white via-cyan-100 to-amber-100 bg-clip-text text-transparent"
-              style={{ WebkitBackgroundClip: "text", backgroundClip: "text" }}
-            >
-              Commander MATE
+            <span className="font-display">
+              <span className="text-white drop-shadow-[0_0_20px_rgba(34,211,238,0.3)]">Commander</span>{" "}
+              <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-amber-200 bg-clip-text text-transparent drop-shadow-[0_0_16px_rgba(251,191,36,0.25)]" style={{ WebkitBackgroundClip: "text", backgroundClip: "text" }}>
+                MATE
+              </span>
             </span>
           </motion.h1>
 
@@ -198,9 +223,9 @@ export default function SpaceCapybaraHero() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.9, duration: 0.5 }}
-            className="mt-2 cursor-default text-xs text-white/55 transition-colors duration-200 hover:text-cyan-200/80 sm:text-sm"
+            className="mt-2 cursor-default text-xs text-zinc-400 transition-colors duration-200 hover:text-cyan-300 sm:text-sm"
           >
-            Deploy the narrative. Ignite the chart.
+            <span className="text-cyan-400/90">Deploy</span> the narrative. <span className="text-amber-400/90">Ignite</span> the chart.
           </motion.p>
         </div>
       </div>
