@@ -102,13 +102,6 @@ export default function AppWithEntry() {
                 </button>
               </div>
               <nav className="flex flex-wrap items-center justify-center gap-2 min-w-0">
-                <Link
-                  href={HUB_URL}
-                  className="min-h-[2.75rem] min-w-[2.75rem] flex items-center justify-center rounded-full border border-zinc-500/40 bg-zinc-600/30 px-3.5 py-2 text-xs font-semibold text-white hover:bg-zinc-500/40 sm:text-sm"
-                  title="Home"
-                >
-                  Home
-                </Link>
                 <Link href="/hot" className="min-h-[2.75rem] min-w-[2.75rem] flex items-center justify-center rounded-full bg-orange-500/20 px-3.5 py-2 text-xs font-semibold text-orange-400 hover:bg-orange-500/30 sm:text-sm">
                   Hot
                 </Link>
