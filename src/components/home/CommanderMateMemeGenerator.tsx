@@ -4,11 +4,19 @@ import { useState, useRef, useEffect, useCallback } from "react";
 
 const CAPYBARA_FACES = Array.from({ length: 11 }, (_, i) => `/capybara-faces/capybara-${i + 1}.png`);
 
-const FACE_SIZE = 200;
 const MEME_WIDTH = 900;
 const MEME_HEIGHT = 600;
 
-type FaceInstance = { id: string; faceIndex: number; x: number; y: number };
+const FACE_SIZES = { sm: 120, md: 200, lg: 280 } as const;
+
+type FaceInstance = {
+  id: string;
+  faceIndex: number;
+  x: number;
+  y: number;
+  size: keyof typeof FACE_SIZES;
+  rotation: number; // degrees
+};
 
 const PRESET_FEELINGS = [
   "Chilling. NFA.",
@@ -278,8 +286,8 @@ function drawMemeBase(
   ctx.fillText("· Commander", cx + 52, h - 20);
 }
 
-function clampPosition(x: number, y: number): { x: number; y: number } {
-  const half = FACE_SIZE / 2;
+function clampPosition(x: number, y: number, size: keyof typeof FACE_SIZES): { x: number; y: number } {
+  const half = FACE_SIZES[size] / 2;
   return {
     x: Math.max(half, Math.min(MEME_WIDTH - half, x)),
     y: Math.max(half, Math.min(MEME_HEIGHT - half, y)),
@@ -288,7 +296,7 @@ function clampPosition(x: number, y: number): { x: number; y: number } {
 
 export default function CommanderMateMemeGenerator() {
   const [faces, setFaces] = useState<FaceInstance[]>([
-    { id: "1", faceIndex: 0, x: 450, y: 480 },
+    { id: "1", faceIndex: 0, x: 450, y: 480, size: "md", rotation: 0 },
   ]);
   const [selectedFaceId, setSelectedFaceId] = useState<string | null>("1");
   const [feeling, setFeeling] = useState("");
@@ -306,11 +314,14 @@ export default function CommanderMateMemeGenerator() {
 
   const addFace = useCallback(() => {
     const id = `face-${Date.now()}`;
+    const sizes: (keyof typeof FACE_SIZES)[] = ["sm", "md", "lg"];
     const newFace: FaceInstance = {
       id,
       faceIndex: Math.floor(Math.random() * 11),
-      x: 150 + faces.length * 120,
-      y: 350 + (faces.length % 2) * 80,
+      x: 120 + (faces.length % 4) * 180,
+      y: 200 + Math.floor(faces.length / 4) * 120,
+      size: sizes[faces.length % 3],
+      rotation: (Math.random() - 0.5) * 24,
     };
     setFaces((prev) => [...prev, newFace]);
     setSelectedFaceId(id);
@@ -325,13 +336,21 @@ export default function CommanderMateMemeGenerator() {
     });
   }, [selectedFaceId]);
 
-  const updateFacePosition = useCallback((id: string, x: number, y: number) => {
-    const { x: cx, y: cy } = clampPosition(x, y);
+  const updateFacePosition = useCallback((id: string, x: number, y: number, size: keyof typeof FACE_SIZES) => {
+    const { x: cx, y: cy } = clampPosition(x, y, size);
     setFaces((prev) => prev.map((f) => (f.id === id ? { ...f, x: cx, y: cy } : f)));
   }, []);
 
   const updateFaceIndex = useCallback((id: string, faceIndex: number) => {
     setFaces((prev) => prev.map((f) => (f.id === id ? { ...f, faceIndex } : f)));
+  }, []);
+
+  const updateFaceSize = useCallback((id: string, size: keyof typeof FACE_SIZES) => {
+    setFaces((prev) => prev.map((f) => (f.id === id ? { ...f, size } : f)));
+  }, []);
+
+  const updateFaceRotation = useCallback((id: string, rotation: number) => {
+    setFaces((prev) => prev.map((f) => (f.id === id ? { ...f, rotation } : f)));
   }, []);
 
   const getCanvasCoords = useCallback(
@@ -366,9 +385,11 @@ export default function CommanderMateMemeGenerator() {
       if (!draggingId) return;
       const coords = getCanvasCoords(clientX, clientY);
       if (!coords) return;
-      updateFacePosition(draggingId, coords.x + dragOffset.current.x, coords.y + dragOffset.current.y);
+      const face = faces.find((f) => f.id === draggingId);
+      if (!face) return;
+      updateFacePosition(draggingId, coords.x + dragOffset.current.x, coords.y + dragOffset.current.y, face.size);
     },
-    [draggingId, getCanvasCoords, updateFacePosition]
+    [draggingId, faces, getCanvasCoords, updateFacePosition]
   );
 
   const handleFaceMouseDown = useCallback(
@@ -439,13 +460,16 @@ export default function CommanderMateMemeGenerator() {
     for (const face of faces) {
       try {
         const img = await loadImage(CAPYBARA_FACES[face.faceIndex]);
-        const half = FACE_SIZE / 2;
-        const x = Math.max(0, Math.min(MEME_WIDTH - FACE_SIZE, face.x - half));
-        const y = Math.max(0, Math.min(MEME_HEIGHT - FACE_SIZE, face.y - half));
+        const sz = FACE_SIZES[face.size];
+        const half = sz / 2;
+        ctx.save();
+        ctx.translate(face.x, face.y);
+        ctx.rotate((face.rotation * Math.PI) / 180);
+        ctx.translate(-half, -half);
         ctx.shadowColor = "rgba(34, 211, 238, 0.25)";
         ctx.shadowBlur = 40;
-        ctx.drawImage(img, x, y, FACE_SIZE, FACE_SIZE);
-        ctx.shadowBlur = 0;
+        ctx.drawImage(img, 0, 0, sz, sz);
+        ctx.restore();
       } catch {
         // skip failed images
       }
@@ -467,7 +491,7 @@ export default function CommanderMateMemeGenerator() {
             What is Commander MATE feeling and thinking?
           </h2>
           <p className="mt-3 text-sm text-zinc-500 sm:text-base">
-            Drag to position. Add multiple Commander MATE faces. Download and share.
+            Create meme collages: drag faces, add more, resize & rotate. Download and share.
           </p>
         </div>
 
@@ -494,16 +518,18 @@ export default function CommanderMateMemeGenerator() {
                     className="pointer-events-none block h-full w-full object-contain"
                   />
                   {/* Draggable Commander MATE faces overlay */}
-                  {faces.map((face) => (
+                  {faces.map((face) => {
+                    const sizePct = (FACE_SIZES[face.size] / MEME_WIDTH) * 100;
+                    return (
                     <div
                       key={face.id}
                       className="absolute cursor-grab active:cursor-grabbing select-none"
                       style={{
                         left: `${(face.x / MEME_WIDTH) * 100}%`,
                         top: `${(face.y / MEME_HEIGHT) * 100}%`,
-                        width: `${(FACE_SIZE / MEME_WIDTH) * 100}%`,
+                        width: `${sizePct}%`,
                         aspectRatio: "1",
-                        transform: "translate(-50%, -50%)",
+                        transform: `translate(-50%, -50%) rotate(${face.rotation}deg)`,
                         zIndex: selectedFaceId === face.id ? 20 : 10,
                       }}
                       onMouseDown={(e) => handleFaceMouseDown(e, face.id)}
@@ -538,16 +564,26 @@ export default function CommanderMateMemeGenerator() {
                         <div className="absolute -bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-cyan-400 ring-2 ring-cyan-400/50" />
                       )}
                     </div>
-                  ))}
+                  );
+                  })}
                   {!imgLoaded && (
                     <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-zinc-900/80">
                       <p className="text-sm text-zinc-500">Loading…</p>
                     </div>
                   )}
                 </div>
-                <p className="py-3 text-center text-xs text-zinc-500">
-                  Drag Commander MATE to reposition · Click to select · Add more below
-                </p>
+                <div className="flex flex-col items-center gap-3 py-4">
+                  <button
+                    type="button"
+                    onClick={addFace}
+                    className="flex items-center gap-2 rounded-xl border-2 border-dashed border-cyan-500/50 bg-cyan-500/5 px-6 py-3 text-sm font-semibold text-cyan-400 transition hover:border-cyan-500 hover:bg-cyan-500/15 hover:text-cyan-300"
+                  >
+                    <span className="text-lg">+</span> Add Commander MATE
+                  </button>
+                  <p className="text-center text-xs text-zinc-500">
+                    Drag to reposition · Click to select · Add multiple for collage style
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -575,24 +611,14 @@ export default function CommanderMateMemeGenerator() {
               </div>
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center gap-3">
-              <label className="block text-[11px] font-semibold uppercase tracking-wider text-cyan-400">
-                Commander MATE faces
-              </label>
-              <button
-                type="button"
-                onClick={addFace}
-                className="rounded-lg border border-cyan-500/50 bg-cyan-500/10 px-3 py-1.5 text-xs font-medium text-cyan-400 transition hover:bg-cyan-500/20"
-              >
-                + Add Commander MATE
-              </button>
-            </div>
-
             {selectedFace && (
-              <div className="mt-3">
-                <p className="mb-1.5 text-[10px] text-zinc-500">
-                  Change face for selected ({faces.length} on meme)
+              <div className="mt-4 space-y-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-cyan-400">
+                  Edit selected ({faces.length} on meme)
                 </p>
+                <div className="flex flex-wrap gap-4">
+                  <div>
+                    <p className="mb-1 text-[10px] text-zinc-500">Face</p>
                 <div className="flex flex-wrap gap-1.5">
                   {CAPYBARA_FACES.map((src, i) => (
                     <button
@@ -608,6 +634,46 @@ export default function CommanderMateMemeGenerator() {
                       <img src={src} alt="" className="h-full w-full object-cover" />
                     </button>
                   ))}
+                </div>
+                  </div>
+                  <div>
+                    <p className="mb-1 text-[10px] text-zinc-500">Size</p>
+                    <div className="flex gap-1">
+                      {(["sm", "md", "lg"] as const).map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => updateFaceSize(selectedFace.id, s)}
+                          className={`rounded border px-2 py-1 text-[10px] font-medium transition ${
+                            selectedFace.size === s
+                              ? "border-cyan-500 bg-cyan-500/20 text-cyan-400"
+                              : "border-zinc-600 bg-zinc-800 text-zinc-400 hover:border-zinc-500"
+                          }`}
+                        >
+                          {s === "sm" ? "Small" : s === "md" ? "Medium" : "Large"}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="mb-1 text-[10px] text-zinc-500">Rotation</p>
+                    <div className="flex gap-1">
+                      {[-15, -5, 0, 5, 15].map((r) => (
+                        <button
+                          key={r}
+                          type="button"
+                          onClick={() => updateFaceRotation(selectedFace.id, r)}
+                          className={`rounded border px-2 py-1 text-[10px] font-medium transition ${
+                            selectedFace.rotation === r
+                              ? "border-cyan-500 bg-cyan-500/20 text-cyan-400"
+                              : "border-zinc-600 bg-zinc-800 text-zinc-400 hover:border-zinc-500"
+                          }`}
+                        >
+                          {r}°
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
