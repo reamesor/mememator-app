@@ -212,6 +212,38 @@ body {
   border-color: rgba(34, 211, 238, 0.25);
 }
 
+/* Solana wallet adapter: dark Mememator theme */
+.wallet-adapter-modal-wrapper,
+.wallet-adapter-modal {
+  background: rgba(9, 9, 11, 0.98) !important;
+  font-family: var(--font-primary) !important;
+}
+.wallet-adapter-modal-title {
+  color: rgb(34, 211, 238) !important;
+  font-family: var(--font-primary) !important;
+}
+.wallet-adapter-modal-list {
+  background: transparent !important;
+}
+.wallet-adapter-modal-list li {
+  background: rgba(24, 24, 27, 0.9) !important;
+  border: 1px solid rgba(113, 113, 122, 0.4) !important;
+  border-radius: 8px !important;
+}
+.wallet-adapter-modal-list li:hover {
+  border-color: rgba(34, 211, 238, 0.5) !important;
+  background: rgba(34, 211, 238, 0.08) !important;
+}
+.wallet-adapter-button-trigger {
+  background: rgba(34, 211, 238, 0.2) !important;
+  color: rgb(34, 211, 238) !important;
+  border: 1px solid rgba(34, 211, 238, 0.5) !important;
+  font-family: var(--font-primary) !important;
+}
+.wallet-adapter-button-trigger:hover {
+  background: rgba(34, 211, 238, 0.3) !important;
+}
+
 /* Scrollbar */
 .window-scroll::-webkit-scrollbar {
   width: 8px;

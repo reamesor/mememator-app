@@ -1,8 +1,41 @@
 "use client";
 
-import { memecoinTrends, DATA_UPDATED_LABEL } from "@/lib/mockData";
+import { useState, useEffect } from "react";
+import { memecoinTrends } from "@/lib/mockData";
+import type { MemecoinTrend } from "@/lib/types";
+
+function formatUpdatedAgo(ts: number): string {
+  const sec = Math.floor((Date.now() - ts) / 1000);
+  if (sec < 60) return "Live · Just now";
+  if (sec < 3600) return `Live · ${Math.floor(sec / 60)}m ago`;
+  return `Live · ${Math.floor(sec / 3600)}h ago`;
+}
 
 export default function MemecoinSection() {
+  const [items, setItems] = useState<MemecoinTrend[]>(memecoinTrends);
+  const [updatedAt, setUpdatedAt] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/market-data")
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled) return;
+        if (data.items?.length) {
+          setItems(data.items);
+          setUpdatedAt(data.updatedAt ?? Date.now());
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <section id="shitcoins" className="scroll-mt-20 py-5 px-3 sm:py-8 sm:px-4">
       <div className="mx-auto w-full max-w-6xl min-w-0">
@@ -10,7 +43,9 @@ export default function MemecoinSection() {
           <h2 className="font-display text-xl tracking-wide text-zinc-100 sm:text-2xl">
             Solana Shitcoins (The Only Coins That Matter)
           </h2>
-          <span className="text-[10px] text-zinc-500">{DATA_UPDATED_LABEL}</span>
+          <span className="text-[10px] text-zinc-500">
+            {loading ? "Loading…" : updatedAt ? formatUpdatedAgo(updatedAt) : "Prices update every 3m"}
+          </span>
         </div>
         <p className="mb-4 text-xs text-zinc-500 sm:text-sm">
           Hot memecoins on SOL. Price, market cap & 24h volume. Spot the narrative before the next anon does. You&apos;re not early. You&apos;re late. Cope.
@@ -20,7 +55,7 @@ export default function MemecoinSection() {
         </p>
         <div className="overflow-x-auto">
           <div className="grid min-w-[520px] gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {memecoinTrends.map((item) => (
+            {items.map((item) => (
               <div
                 key={item.id}
                 className="card-hover rounded-lg border border-zinc-800 bg-zinc-900/50 p-3"

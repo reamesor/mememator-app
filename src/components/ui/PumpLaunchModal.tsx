@@ -1,7 +1,9 @@
 "use client";
 
 import { useMate } from "@/context/MateContext";
-import { X } from "lucide-react";
+import { X, ExternalLink } from "lucide-react";
+
+const PUMP_FUN_CREATE_URL = "https://pump.fun/create";
 
 type PumpLaunchModalProps = {
   open: boolean;
@@ -26,6 +28,7 @@ export default function PumpLaunchModal({
     burnForLaunch();
     onConfirm();
     onClose();
+    window.open(PUMP_FUN_CREATE_URL, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -45,8 +48,11 @@ export default function PumpLaunchModal({
         <p className="mb-2 font-pixel text-[10px] text-zinc-400">
           Token: <span className="text-white">{tokenName}</span> (<span className="text-cyan-400">{ticker}</span>)
         </p>
-        <p className="mb-4 font-pixel text-[10px] text-amber-400">
+        <p className="mb-2 font-pixel text-[10px] text-amber-400">
           Burning {burnFeeLaunch} $MATE for luck...
+        </p>
+        <p className="mb-4 font-pixel text-[9px] text-zinc-500">
+          You&apos;ll complete your token creation on Pump.fun. No custody—your wallet, your keys.
         </p>
         <div className="flex gap-3">
           <button
@@ -59,9 +65,10 @@ export default function PumpLaunchModal({
           <button
             type="button"
             onClick={handleLaunch}
-            className="min-h-[2.75rem] flex-1 rounded border-2 border-red-500 bg-red-500/20 py-2 font-pixel text-[10px] text-red-400 hover:bg-red-500/30"
+            className="min-h-[2.75rem] flex-1 flex items-center justify-center gap-2 rounded border-2 border-cyan-400/60 bg-cyan-400/20 py-2 font-pixel text-[10px] text-cyan-400 hover:bg-cyan-400/30"
           >
-            Do Not Press
+            Launch on Pump.fun
+            <ExternalLink size={12} />
           </button>
         </div>
       </div>

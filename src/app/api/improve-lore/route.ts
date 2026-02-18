@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { fetchMarketContext } from "@/lib/marketContext";
 
 export const maxDuration = 30;
 
@@ -39,12 +40,17 @@ export async function POST(req: Request) {
       return NextResponse.json(mock);
     }
 
+    const { summary, date } = await fetchMarketContext();
+
     const prompt = `You are helping someone write token lore and meme copy for a Solana/pump.fun meme token. Keep the tone: degen, unhinged, self-aware, funny. No corporate speak.
+- MUST feel current: today is ${date}. Use real market context below. Avoid dated or generic references.
 
 Token name/concept: ${body.tokenName || "(not set)"}
 Theme: ${body.themeName || "(any)"}
 Current lore (improve or expand): ${body.lore || "(none yet)"}
 Current meme angle: ${body.memeAngle || "(none yet)"}
+
+Current market context (reference for timely lore): ${summary || "Market data unavailable — keep tone current."}
 
 Respond with valid JSON only, no markdown, no code fence:
 {

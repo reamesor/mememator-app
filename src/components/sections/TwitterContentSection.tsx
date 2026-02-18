@@ -6,6 +6,19 @@ export default function TwitterContentSection() {
   const [topic, setTopic] = useState("");
   const [tone, setTone] = useState<"hype" | "unhinged" | "copium" | "fud" | "alpha" | "meme">("unhinged");
   const [generated, setGenerated] = useState<string | null>(null);
+  const [trendingLoading, setTrendingLoading] = useState(false);
+
+  const useTrendingTopic = async () => {
+    setTrendingLoading(true);
+    try {
+      const res = await fetch("/api/market-context");
+      const data = await res.json();
+      const top = data.topCoins?.[0];
+      if (top?.symbol) setTopic(top.symbol);
+    } finally {
+      setTrendingLoading(false);
+    }
+  };
 
   const generateContent = () => {
     if (!topic.trim()) return;
@@ -65,13 +78,23 @@ export default function TwitterContentSection() {
             <label className="mb-1 block text-xs font-medium text-zinc-400">
               Topic or token / narrative
             </label>
+            <div className="flex gap-2">
             <input
               type="text"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder="e.g. WIF, pump.fun, Solana summer, my shitcoin"
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              className="flex-1 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
             />
+            <button
+              type="button"
+              onClick={useTrendingTopic}
+              disabled={trendingLoading}
+              className="shrink-0 rounded-lg border border-cyan-500/50 bg-cyan-500/10 px-2.5 py-2 text-[10px] font-medium text-cyan-400 transition hover:bg-cyan-500/20 disabled:opacity-50"
+            >
+              {trendingLoading ? "…" : "Live top"}
+            </button>
+          </div>
           </div>
           <div className="mb-4">
             <label className="mb-1 block text-xs font-medium text-zinc-400">

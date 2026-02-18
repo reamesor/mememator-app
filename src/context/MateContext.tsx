@@ -9,10 +9,6 @@ const BURN_FEE_LAUNCH = 500;
 type MateContextType = {
   balance: number;
   setBalance: (n: number) => void;
-  isConnected: boolean;
-  setConnected: (b: boolean) => void;
-  walletAddress: string | null;
-  setWalletAddress: (a: string | null) => void;
   canUseHighResOrDeepFried: boolean;
   isForgeMaster: boolean;
   burnFeeLaunch: number;
@@ -23,8 +19,6 @@ const MateContext = createContext<MateContextType | null>(null);
 
 export function MateProvider({ children }: { children: ReactNode }) {
   const [balance, setBalance] = useState(75_000);
-  const [isConnected, setConnected] = useState(false);
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
 
   const canUseHighResOrDeepFried = balance >= MATE_UNLOCK_STYLE;
   const isForgeMaster = balance >= FORGE_MASTER;
@@ -38,10 +32,6 @@ export function MateProvider({ children }: { children: ReactNode }) {
       value={{
         balance,
         setBalance,
-        isConnected,
-        setConnected,
-        walletAddress,
-        setWalletAddress,
         canUseHighResOrDeepFried,
         isForgeMaster,
         burnFeeLaunch: BURN_FEE_LAUNCH,

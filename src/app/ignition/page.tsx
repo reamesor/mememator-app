@@ -2,21 +2,24 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { ArrowLeft, Wallet } from "lucide-react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import BurnTicker from "@/components/ui/BurnTicker";
 import IgnitionHero from "@/components/landing/IgnitionHero";
 import RetroCard from "@/components/ui/RetroCard";
-import { useMate } from "@/context/MateContext";
 
 export default function IgnitionPage() {
   const router = useRouter();
-  const { isConnected, setConnected, setWalletAddress } = useMate();
+  const { connected, publicKey } = useWallet();
+  const { setVisible } = useWalletModal();
 
-  const handleConnect = () => {
-    setConnected(true);
-    setWalletAddress("7xK...3mN");
-    router.push("/forge");
-  };
+  useEffect(() => {
+    if (connected && publicKey) router.push("/forge");
+  }, [connected, publicKey, router]);
+
+  const handleConnect = () => setVisible(true);
 
   return (
     <div className="min-h-screen bg-void-grid-see-through">
@@ -68,11 +71,11 @@ export default function IgnitionPage() {
 
         <button
           type="button"
-          onClick={isConnected ? () => router.push("/forge") : handleConnect}
+          onClick={connected ? () => router.push("/forge") : handleConnect}
           className="min-h-[3rem] flex items-center justify-center gap-2 rounded-lg border-2 border-cyan-400/60 bg-cyan-400/10 px-8 py-4 font-pixel text-xs text-cyan-400 transition hover:bg-cyan-400/20 sm:text-sm"
         >
             <Wallet size={18} />
-            {isConnected ? "Enter The Forge" : "Connect Wallet"}
+            {connected ? "Enter The Forge" : "Connect Wallet"}
           </button>
 
           <div className="mt-8 flex gap-6 font-pixel text-[8px] text-zinc-500 sm:text-[10px]">

@@ -2,7 +2,9 @@
 
 import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Lock, Sparkles, X } from "lucide-react";
+import { useWallet } from "@solana/wallet-adapter-react";
 import BurnTicker from "@/components/ui/BurnTicker";
 import ChaosSlider from "@/components/ui/ChaosSlider";
 import RetroCard from "@/components/ui/RetroCard";
@@ -12,14 +14,23 @@ import { useForgeDraft } from "@/context/ForgeDraftContext";
 import { FORGE_STYLES, type ForgeStyleId } from "@/lib/forgeStyles";
 
 export default function ForgePage() {
+  const router = useRouter();
+  const { publicKey, disconnect, connected } = useWallet();
   const {
     balance,
-    walletAddress,
     isForgeMaster,
     canUseHighResOrDeepFried,
-    setWalletAddress,
-    setConnected,
   } = useMate();
+
+  const walletAddress = publicKey ? `${publicKey.toString().slice(0, 4)}...${publicKey.toString().slice(-4)}` : null;
+
+  useEffect(() => {
+    if (connected) return;
+    const t = setTimeout(() => {
+      router.replace("/ignition");
+    }, 1200); // Give wallet adapter time to auto-connect
+    return () => clearTimeout(t);
+  }, [connected, router]);
   const { loreDraft, memeDraft, clearLoreDraft, clearMemeDraft } = useForgeDraft();
   const [style, setStyle] = useState<ForgeStyleId>("legacy");
   const [chaos, setChaos] = useState(0);
@@ -90,7 +101,7 @@ export default function ForgePage() {
             )}
             <button
               type="button"
-              onClick={() => (setWalletAddress(null), setConnected(false))}
+              onClick={() => disconnect()}
               className="min-h-[2.75rem] rounded border border-zinc-600 px-3 py-2 font-pixel text-xs text-zinc-400 hover:border-zinc-500 hover:text-zinc-300 sm:text-sm"
             >
               Disconnect

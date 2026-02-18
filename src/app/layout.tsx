@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { MateProvider } from "@/context/MateContext";
 import { ForgeDraftProvider } from "@/context/ForgeDraftContext";
+import SolanaWalletProvider from "@/providers/SolanaWalletProvider";
 import InteractiveBackground from "@/components/ui/InteractiveBackground";
 import FloatingCapybaraFaces from "@/components/ui/FloatingCapybaraFaces";
 
@@ -28,9 +29,11 @@ export default function RootLayout({
         <InteractiveBackground />
         <FloatingCapybaraFaces />
         <div className="relative z-10">
-          <MateProvider>
-            <ForgeDraftProvider>{children}</ForgeDraftProvider>
-          </MateProvider>
+          <SolanaWalletProvider>
+            <MateProvider>
+              <ForgeDraftProvider>{children}</ForgeDraftProvider>
+            </MateProvider>
+          </SolanaWalletProvider>
         </div>
       </body>
     </html>

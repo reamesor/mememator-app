@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { hotTopics } from "@/lib/mockData";
 import type { HotTopicVibe } from "@/lib/types";
+import type { HotTopic } from "@/lib/types";
 
 const vibeLabels: Record<HotTopicVibe, string> = {
   trending: "What's going on",
@@ -18,11 +19,47 @@ const vibeStyles: Record<HotTopicVibe, string> = {
 
 export default function HotTopicsSection() {
   const [filter, setFilter] = useState<HotTopicVibe | "all">("all");
+  const [liveTopics, setLiveTopics] = useState<HotTopic[]>([]);
 
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/market-data")
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled || !data.items?.length) return;
+        const items = data.items as Array<{ name: string; symbol: string; change24h: number; marketCap: string }>;
+        const derived: HotTopic[] = [];
+        const topGainer = items.filter((i) => i.change24h > 0).sort((a, b) => b.change24h - a.change24h)[0];
+        if (topGainer && topGainer.change24h >= 3) {
+          derived.push({
+            id: "live-gainer",
+            title: `${topGainer.symbol} +${topGainer.change24h.toFixed(1)}% — top memecoin gainer`,
+            body: `${topGainer.name} leading memecoin gains today. MCap ${topGainer.marketCap}. Narrative is live.`,
+            vibe: "trending",
+            oneLiner: "Real-time market. Not dated.",
+          });
+        }
+        const topLoser = items.filter((i) => i.change24h < 0).sort((a, b) => a.change24h - b.change24h)[0];
+        if (topLoser && topLoser.change24h <= -5) {
+          derived.push({
+            id: "live-loser",
+            title: `${topLoser.symbol} ${topLoser.change24h.toFixed(1)}% — market correcting`,
+            body: `${topLoser.name} down today. Buy the dip or NGMI. Your call.`,
+            vibe: "trending",
+            oneLiner: "Live data. Make your move.",
+          });
+        }
+        if (derived.length) setLiveTopics(derived);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  const allTopics = [...liveTopics, ...hotTopics];
   const filtered =
     filter === "all"
-      ? hotTopics
-      : hotTopics.filter((t) => t.vibe === filter);
+      ? allTopics
+      : allTopics.filter((t) => t.vibe === filter);
 
   return (
     <section id="hot" className="scroll-mt-20 py-5 px-3 sm:py-8 sm:px-4">
@@ -31,7 +68,7 @@ export default function HotTopicsSection() {
           Hot Topics — What&apos;s Going On
         </h2>
         <p className="mb-4 text-xs text-zinc-500 sm:text-sm">
-          Latest Solana trends. What&apos;s moving, what&apos;s funny as shit, and what&apos;s completely retarded. Everyone can see it.
+          Live market updates + Solana trends. What&apos;s moving, what&apos;s funny, and what&apos;s peak retardness. Always current.
         </p>
         <p className="mb-4 text-[10px] text-zinc-600">
           Spot the narrative, then head to the Meme generator or Lore page to turn it into content. Launch when ready.

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { fetchMarketContext } from "@/lib/marketContext";
 
 export const maxDuration = 30;
 
@@ -32,16 +33,21 @@ export async function POST(req: Request) {
       return NextResponse.json(mock);
     }
 
+    const { summary, date } = await fetchMarketContext();
+
     const prompt = `You are helping someone create Twitter/X tweets for a Solana/pump.fun meme token launch. Generate tweets that:
 - Are ready to post (no corporate speak, degen tone)
 - Can be used in advance or at launch for smooth content rollout
 - Include token name and theme, fit CT (crypto Twitter) culture
 - End with NFA or similar where appropriate
 - Stay under 280 chars each when possible (some can be longer for threads)
+- MUST feel current: reference today's date (${date}) and real market context below. Do NOT use dated or generic references.
 
 Token name: ${body.tokenName || "(not set)"}
 Theme: ${body.themeName || "(any)"}
 Lore/context: ${body.lore || "(none)"}
+
+Current market context (use this to make tweets precise and timely): ${summary || "Market data unavailable — still keep tone current and avoid dated references."}
 
 Respond with valid JSON only, no markdown:
 {
