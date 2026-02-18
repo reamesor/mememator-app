@@ -59,7 +59,7 @@ function PurposeBlock() {
             <span className="font-semibold text-cyan-400">chaos meets capital.</span>
           </p>
           <p className="mt-1.5 text-[10px] text-zinc-500 sm:text-xs">
-            <span className="text-cyan-400/80">Lore</span> → <span className="text-cyan-400/80">Meme</span> → <span className="text-cyan-400/80">Forge</span> → <span className="text-cyan-400/80">Pump</span>. Hot topics, KOL memes, token lore, capybara faces, one-click launch. We got you.
+            <span className="text-cyan-400/80">Lore</span> → <span className="text-cyan-400/80">Meme</span> → <span className="text-cyan-400/80">Forge</span> → <span className="text-cyan-400/80">Pump</span>. Hot topics, KOL memes, token lore, Commander MATE faces, one-click launch. We got you.
           </p>
         </div>
       </div>

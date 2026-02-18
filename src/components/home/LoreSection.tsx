@@ -28,7 +28,7 @@ export default function LoreSection() {
                 The Origin
               </h3>
               <p>
-                MATE was originally a regular capybara who was so fundamentally unbothered by the chaos of the jungle
+                MATE was originally a regular Commander MATE who was so fundamentally unbothered by the chaos of the jungle
                 that he accidentally detached from Earth&apos;s gravity. While other animals fought for survival, MATE
                 achieved a state of &quot;Absolute Zen&quot; and floated into the stratosphere.
               </p>

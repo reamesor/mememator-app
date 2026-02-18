@@ -109,7 +109,7 @@ export default function MemeGenerator() {
                 <Zap size={14} /> SYSTEM LORE
               </h4>
               <p className="font-mono text-[11px] leading-relaxed text-zinc-500">
-                The Capybara is the silent observer. Broadcast the $MATE philosophy to the masses.
+                Commander MATE is the silent observer. Broadcast the $MATE philosophy to the masses.
               </p>
             </div>
           </div>

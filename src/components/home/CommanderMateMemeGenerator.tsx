@@ -1,8 +1,14 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
 const CAPYBARA_FACES = Array.from({ length: 11 }, (_, i) => `/capybara-faces/capybara-${i + 1}.png`);
+
+const FACE_SIZE = 200;
+const MEME_WIDTH = 900;
+const MEME_HEIGHT = 600;
+
+type FaceInstance = { id: string; faceIndex: number; x: number; y: number };
 
 const PRESET_FEELINGS = [
   "Chilling. NFA.",
@@ -21,10 +27,38 @@ const PRESET_FEELINGS = [
   "Touch grass? Building on Solana.",
   "Paper hands sold. I'm still here.",
   "The bonding curve is my therapy.",
+  "It's not a rug, it's a correction",
+  "WAGMI. Probably.",
+  "Sent it. No cap.",
+  "This is financial advice (it isn't)",
+  "Anon energy only",
+  "Unhinged but based",
+  "CT brainrot mode",
+  "Solana said yes, my wallet said oops",
 ];
 
-const MEME_WIDTH = 900;
-const MEME_HEIGHT = 600;
+const PRESET_THINKING = [
+  "Just another day in the forge.",
+  "If you know, you know.",
+  "NFA but we're not selling.",
+  "The curve only goes up. (It doesn't.)",
+  "Reject utility. Embrace chaos.",
+  "One bonding curve to rule them all.",
+  "We're not early. We're not late. We're sending it.",
+  "No pitch deck. Just vibes.",
+  "LP burned. Community based. Chart doing chart things.",
+  "Ser. This is fine.",
+  "Diamond hands till we hit zero or hero.",
+  "Pump.fun is my second home",
+  "Waiting for the next 100x.",
+  "Touch grass? Building on Solana.",
+  "The only roadmap is up. Or down. No one knows.",
+  "Based and degen-pilled.",
+  "Red candles can't hurt you if you don't look.",
+  "Aping at 3am hits different.",
+  "One more chart. Then bed. (Spoiler: it's never one.)",
+  "Watching the chart. The chart is watching back.",
+];
 
 const BACKGROUNDS = [
   { id: "void", label: "Dark void" },
@@ -33,9 +67,12 @@ const BACKGROUNDS = [
   { id: "sunset", label: "Sunset" },
   { id: "cyber", label: "Cyber" },
   { id: "ocean", label: "Ocean" },
+  { id: "pump", label: "Pump.fun" },
+  { id: "rug", label: "Rug red" },
+  { id: "aurora", label: "Aurora" },
+  { id: "neon", label: "Neon mesh" },
+  { id: "gold", label: "Gold rush" },
 ] as const;
-
-const DEFAULT_POSITION = { x: 0.2, y: 0.92 } as const;
 
 function drawBackground(ctx: CanvasRenderingContext2D, w: number, h: number, bgId: string) {
   const g = ctx.createLinearGradient(0, 0, 0, h);
@@ -65,6 +102,37 @@ function drawBackground(ctx: CanvasRenderingContext2D, w: number, h: number, bgI
       g.addColorStop(0, "#0c4a6e");
       g.addColorStop(0.4, "#0369a1");
       g.addColorStop(0.8, "#0e7490");
+      g.addColorStop(1, "#050508");
+      break;
+    case "pump":
+      g.addColorStop(0, "#14532d");
+      g.addColorStop(0.3, "#166534");
+      g.addColorStop(0.6, "#22c55e");
+      g.addColorStop(1, "#0a0a0f");
+      break;
+    case "rug":
+      g.addColorStop(0, "#450a0a");
+      g.addColorStop(0.4, "#7f1d1d");
+      g.addColorStop(0.7, "#b91c1c");
+      g.addColorStop(1, "#050508");
+      break;
+    case "aurora":
+      g.addColorStop(0, "#052e16");
+      g.addColorStop(0.25, "#14532d");
+      g.addColorStop(0.5, "#064e3b");
+      g.addColorStop(0.75, "#134e4a");
+      g.addColorStop(1, "#0a0a0f");
+      break;
+    case "neon":
+      g.addColorStop(0, "#1e1b4b");
+      g.addColorStop(0.35, "#312e81");
+      g.addColorStop(0.65, "#4c1d95");
+      g.addColorStop(1, "#0a0a0f");
+      break;
+    case "gold":
+      g.addColorStop(0, "#1c1917");
+      g.addColorStop(0.3, "#422006");
+      g.addColorStop(0.6, "#a16207");
       g.addColorStop(1, "#050508");
       break;
     default:
@@ -126,22 +194,18 @@ function wrapText(
   });
 }
 
-function drawMeme(
+function drawMemeBase(
   ctx: CanvasRenderingContext2D,
-  img: HTMLImageElement,
   feeling: string,
   thinking: string,
-  backgroundId: string,
-  capybaraPos: { x: number; y: number }
+  backgroundId: string
 ) {
   const w = MEME_WIDTH;
   const h = MEME_HEIGHT;
   const cx = w / 2;
 
-  // User-selected background
   drawBackground(ctx, w, h, backgroundId);
 
-  // Subtle circuit / grid accent (capybara vibe)
   ctx.strokeStyle = "rgba(34, 211, 238, 0.04)";
   ctx.lineWidth = 1;
   const gridStep = 48;
@@ -158,7 +222,6 @@ function drawMeme(
     ctx.stroke();
   }
 
-  // Cyan / amber radial glow
   const glow = ctx.createRadialGradient(cx, h * 0.7, 0, cx, h * 0.7, w * 0.7);
   glow.addColorStop(0, "rgba(34, 211, 238, 0.06)");
   glow.addColorStop(0.4, "rgba(251, 146, 60, 0.03)");
@@ -166,26 +229,14 @@ function drawMeme(
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, w, h);
 
-  // Capybara — positioned by user
-  const faceSize = 260;
-  const faceX = Math.max(0, Math.min(w - faceSize, w * capybaraPos.x - faceSize / 2));
-  const faceY = Math.max(0, Math.min(h - faceSize, h * capybaraPos.y - faceSize / 2));
-  ctx.shadowColor = "rgba(34, 211, 238, 0.25)";
-  ctx.shadowBlur = 40;
-  ctx.drawImage(img, faceX, faceY, faceSize, faceSize);
-  ctx.shadowBlur = 0;
-
-  // Clean dark cards — zinc / glass, not white
   const pad = 56;
   const cardW = w - pad * 2;
   const cardH = 90;
   const gap = 16;
   const cardY1 = 52;
   const cardY2 = cardY1 + cardH + gap;
-
   const radius = 12;
 
-  // Card 1: FEELING — clean dark zinc, cyan border
   roundBubble(ctx, pad, cardY1, cardW, cardH, radius);
   ctx.fillStyle = "rgba(39, 39, 42, 0.92)";
   ctx.fill();
@@ -193,7 +244,6 @@ function drawMeme(
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
-  // Card 2: THINKING — clean dark zinc, amber border
   roundBubble(ctx, pad, cardY2, cardW, cardH, radius);
   ctx.fillStyle = "rgba(39, 39, 42, 0.92)";
   ctx.fill();
@@ -201,7 +251,6 @@ function drawMeme(
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
-  // Labels & text
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.font = "600 11px JetBrains Mono, ui-monospace, monospace";
@@ -218,7 +267,6 @@ function drawMeme(
   ctx.font = "700 20px system-ui, sans-serif";
   wrapText(ctx, thinking, cx, cardY2 + 58, cardW - 48, 26, 20, "700");
 
-  // Watermark — Mememator $MATE style
   ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
   ctx.fillRect(0, h - 40, w, 40);
   ctx.fillStyle = "rgba(34, 211, 238, 0.9)";
@@ -230,58 +278,186 @@ function drawMeme(
   ctx.fillText("· Commander", cx + 52, h - 20);
 }
 
+function clampPosition(x: number, y: number): { x: number; y: number } {
+  const half = FACE_SIZE / 2;
+  return {
+    x: Math.max(half, Math.min(MEME_WIDTH - half, x)),
+    y: Math.max(half, Math.min(MEME_HEIGHT - half, y)),
+  };
+}
+
 export default function CommanderMateMemeGenerator() {
-  const [faceIndex, setFaceIndex] = useState(0);
+  const [faces, setFaces] = useState<FaceInstance[]>([
+    { id: "1", faceIndex: 0, x: 450, y: 480 },
+  ]);
+  const [selectedFaceId, setSelectedFaceId] = useState<string | null>("1");
   const [feeling, setFeeling] = useState("");
   const [thinking, setThinking] = useState("");
   const [backgroundId, setBackgroundId] = useState<string>("void");
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
+
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const dragOffset = useRef({ x: 0, y: 0 });
 
   const presetFeeling = feeling.trim() || "Chilling. NFA.";
   const presetThinking = thinking.trim() || "Just another day in the forge.";
 
-  // Auto-redraw preview when state changes
+  const addFace = useCallback(() => {
+    const id = `face-${Date.now()}`;
+    const newFace: FaceInstance = {
+      id,
+      faceIndex: Math.floor(Math.random() * 11),
+      x: 150 + faces.length * 120,
+      y: 350 + (faces.length % 2) * 80,
+    };
+    setFaces((prev) => [...prev, newFace]);
+    setSelectedFaceId(id);
+  }, [faces.length]);
+
+  const removeFace = useCallback((id: string) => {
+    setFaces((prev) => {
+      const next = prev.filter((f) => f.id !== id);
+      if (next.length === 0) return prev;
+      if (selectedFaceId === id) setSelectedFaceId(next[0].id);
+      return next;
+    });
+  }, [selectedFaceId]);
+
+  const updateFacePosition = useCallback((id: string, x: number, y: number) => {
+    const { x: cx, y: cy } = clampPosition(x, y);
+    setFaces((prev) => prev.map((f) => (f.id === id ? { ...f, x: cx, y: cy } : f)));
+  }, []);
+
+  const updateFaceIndex = useCallback((id: string, faceIndex: number) => {
+    setFaces((prev) => prev.map((f) => (f.id === id ? { ...f, faceIndex } : f)));
+  }, []);
+
+  const getCanvasCoords = useCallback(
+    (clientX: number, clientY: number) => {
+      const el = containerRef.current;
+      if (!el) return null;
+      const rect = el.getBoundingClientRect();
+      const scaleX = MEME_WIDTH / rect.width;
+      const scaleY = MEME_HEIGHT / rect.height;
+      return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top) * scaleY,
+      };
+    },
+    []
+  );
+
+  const startDrag = useCallback(
+    (clientX: number, clientY: number, id: string) => {
+      const coords = getCanvasCoords(clientX, clientY);
+      if (!coords) return;
+      const face = faces.find((f) => f.id === id);
+      if (!face) return;
+      setDraggingId(id);
+      dragOffset.current = { x: face.x - coords.x, y: face.y - coords.y };
+    },
+    [faces, getCanvasCoords]
+  );
+
+  const doDrag = useCallback(
+    (clientX: number, clientY: number) => {
+      if (!draggingId) return;
+      const coords = getCanvasCoords(clientX, clientY);
+      if (!coords) return;
+      updateFacePosition(draggingId, coords.x + dragOffset.current.x, coords.y + dragOffset.current.y);
+    },
+    [draggingId, getCanvasCoords, updateFacePosition]
+  );
+
+  const handleFaceMouseDown = useCallback(
+    (e: React.MouseEvent, id: string) => {
+      e.preventDefault();
+      startDrag(e.clientX, e.clientY, id);
+    },
+    [startDrag]
+  );
+
+  const handleFaceTouchStart = useCallback(
+    (e: React.TouchEvent, id: string) => {
+      const t = e.touches[0];
+      if (t) startDrag(t.clientX, t.clientY, id);
+    },
+    [startDrag]
+  );
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      doDrag(e.clientX, e.clientY);
+    },
+    [doDrag]
+  );
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (e.touches[0]) doDrag(e.touches[0].clientX, e.touches[0].clientY);
+    },
+    [doDrag]
+  );
+
+  const handleMouseUp = useCallback(() => {
+    setDraggingId(null);
+  }, []);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    canvas.width = MEME_WIDTH;
+    canvas.height = MEME_HEIGHT;
+    drawMemeBase(ctx, presetFeeling, presetThinking, backgroundId);
+    setImgLoaded(true);
+  }, [presetFeeling, presetThinking, backgroundId]);
+
+  const handleDownload = useCallback(async () => {
+    const canvas = canvasRef.current;
+    if (!canvas || faces.length === 0) return;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     canvas.width = MEME_WIDTH;
     canvas.height = MEME_HEIGHT;
+    drawMemeBase(ctx, presetFeeling, presetThinking, backgroundId);
 
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.src = CAPYBARA_FACES[faceIndex];
-    img.onload = () => {
-      setImgLoaded(true);
-      drawMeme(ctx, img, presetFeeling, presetThinking, backgroundId, DEFAULT_POSITION);
-    };
-  }, [faceIndex, presetFeeling, presetThinking, backgroundId]);
+    const loadImage = (src: string) =>
+      new Promise<HTMLImageElement>((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+      });
 
-  const handleDownload = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    for (const face of faces) {
+      try {
+        const img = await loadImage(CAPYBARA_FACES[face.faceIndex]);
+        const half = FACE_SIZE / 2;
+        const x = Math.max(0, Math.min(MEME_WIDTH - FACE_SIZE, face.x - half));
+        const y = Math.max(0, Math.min(MEME_HEIGHT - FACE_SIZE, face.y - half));
+        ctx.shadowColor = "rgba(34, 211, 238, 0.25)";
+        ctx.shadowBlur = 40;
+        ctx.drawImage(img, x, y, FACE_SIZE, FACE_SIZE);
+        ctx.shadowBlur = 0;
+      } catch {
+        // skip failed images
+      }
+    }
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const a = document.createElement("a");
+    a.download = `commander-mate-mood-${Date.now()}.png`;
+    a.href = canvas.toDataURL("image/png");
+    a.click();
+  }, [faces, presetFeeling, presetThinking, backgroundId]);
 
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.src = CAPYBARA_FACES[faceIndex];
-    img.onload = () => {
-      canvas.width = MEME_WIDTH;
-      canvas.height = MEME_HEIGHT;
-      drawMeme(ctx, img, presetFeeling, presetThinking, backgroundId, DEFAULT_POSITION);
-
-      const a = document.createElement("a");
-      a.download = `commander-mate-mood-${Date.now()}.png`;
-      a.href = canvas.toDataURL("image/png");
-      a.click();
-    };
-  };
+  const selectedFace = faces.find((f) => f.id === selectedFaceId);
 
   return (
     <section className="border-t border-zinc-800/60 bg-gradient-to-b from-zinc-950/80 to-zinc-950/95">
@@ -291,40 +467,91 @@ export default function CommanderMateMemeGenerator() {
             What is Commander MATE feeling and thinking?
           </h2>
           <p className="mt-3 text-sm text-zinc-500 sm:text-base">
-            Pick a Commander MATE face, type your vibes. Download and share.
+            Drag to position. Add multiple Commander MATE faces. Download and share.
           </p>
         </div>
 
         <div className="flex flex-col gap-8">
-          {/* Preview first */}
           <div className="flex min-w-0 flex-col items-center">
             <div className="relative w-full max-w-[900px] min-w-0">
               <div className="absolute -inset-2 rounded-2xl bg-gradient-to-br from-cyan-500/20 via-zinc-800/50 to-amber-500/15 opacity-80 blur-2xl" />
               <div className="relative overflow-hidden rounded-2xl border border-cyan-500/30 border-amber-500/20 bg-zinc-900/95 shadow-2xl shadow-cyan-500/5">
                 <div
-                  className="relative w-full overflow-hidden rounded-t-xl"
+                  ref={containerRef}
+                  className="relative w-full"
                   style={{ aspectRatio: `${MEME_WIDTH} / ${MEME_HEIGHT}` }}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                  onMouseLeave={handleMouseUp}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleMouseUp}
+                  onTouchCancel={handleMouseUp}
                 >
                   <canvas
                     ref={canvasRef}
                     width={MEME_WIDTH}
                     height={MEME_HEIGHT}
-                    className="block h-full w-full object-contain"
+                    className="pointer-events-none block h-full w-full object-contain"
                   />
+                  {/* Draggable Commander MATE faces overlay */}
+                  {faces.map((face) => (
+                    <div
+                      key={face.id}
+                      className="absolute cursor-grab active:cursor-grabbing select-none"
+                      style={{
+                        left: `${(face.x / MEME_WIDTH) * 100}%`,
+                        top: `${(face.y / MEME_HEIGHT) * 100}%`,
+                        width: `${(FACE_SIZE / MEME_WIDTH) * 100}%`,
+                        aspectRatio: "1",
+                        transform: "translate(-50%, -50%)",
+                        zIndex: selectedFaceId === face.id ? 20 : 10,
+                      }}
+                      onMouseDown={(e) => handleFaceMouseDown(e, face.id)}
+                      onTouchStart={(e) => handleFaceTouchStart(e, face.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!draggingId) setSelectedFaceId(face.id);
+                      }}
+                    >
+                      <img
+                        src={CAPYBARA_FACES[face.faceIndex]}
+                        alt=""
+                        className="h-full w-full object-contain drop-shadow-[0_0_20px_rgba(34,211,238,0.3)]"
+                        draggable={false}
+                        style={{ pointerEvents: "none" }}
+                      />
+                      {selectedFaceId === face.id && faces.length > 1 && (
+                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex gap-1">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeFace(face.id);
+                            }}
+                            className="rounded bg-red-500/80 px-2 py-0.5 text-[10px] text-white hover:bg-red-500"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      )}
+                      {selectedFaceId === face.id && (
+                        <div className="absolute -bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-cyan-400 ring-2 ring-cyan-400/50" />
+                      )}
+                    </div>
+                  ))}
                   {!imgLoaded && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/80">
+                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-zinc-900/80">
                       <p className="text-sm text-zinc-500">Loading…</p>
                     </div>
                   )}
                 </div>
                 <p className="py-3 text-center text-xs text-zinc-500">
-                  Preview updates automatically as you type
+                  Drag Commander MATE to reposition · Click to select · Add more below
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Controls below preview */}
           <div className="rounded-2xl border border-zinc-700/60 bg-zinc-900/50 p-4 sm:p-5">
             <div>
               <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-cyan-400">
@@ -348,27 +575,42 @@ export default function CommanderMateMemeGenerator() {
               </div>
             </div>
 
-            <div className="mt-4">
-              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-cyan-400">
-                Commander MATE face
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-cyan-400">
+                Commander MATE faces
               </label>
-              <div className="flex flex-wrap gap-1.5">
-                {CAPYBARA_FACES.map((src, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => setFaceIndex(i)}
-                    className={`h-9 w-9 overflow-hidden rounded-lg border-2 transition-all ${
-                      faceIndex === i
-                        ? "border-cyan-500 shadow-[0_0_12px_rgba(34,211,238,0.25)] ring-1 ring-cyan-400/30"
-                        : "border-zinc-600 hover:border-zinc-500 hover:scale-105"
-                    }`}
-                  >
-                    <img src={src} alt={`Face ${i + 1}`} className="h-full w-full object-cover" />
-                  </button>
-                ))}
-              </div>
+              <button
+                type="button"
+                onClick={addFace}
+                className="rounded-lg border border-cyan-500/50 bg-cyan-500/10 px-3 py-1.5 text-xs font-medium text-cyan-400 transition hover:bg-cyan-500/20"
+              >
+                + Add Commander MATE
+              </button>
             </div>
+
+            {selectedFace && (
+              <div className="mt-3">
+                <p className="mb-1.5 text-[10px] text-zinc-500">
+                  Change face for selected ({faces.length} on meme)
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {CAPYBARA_FACES.map((src, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => updateFaceIndex(selectedFace.id, i)}
+                      className={`h-9 w-9 overflow-hidden rounded-lg border-2 transition-all ${
+                        selectedFace.faceIndex === i
+                          ? "border-cyan-500 shadow-[0_0_12px_rgba(34,211,238,0.25)] ring-1 ring-cyan-400/30"
+                          : "border-zinc-600 hover:border-zinc-500 hover:scale-105"
+                      }`}
+                    >
+                      <img src={src} alt="" className="h-full w-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div>
@@ -399,14 +641,32 @@ export default function CommanderMateMemeGenerator() {
 
             <div className="mt-4">
               <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
-                Quick picks
+                Feeling quick picks
               </label>
-              <div className="flex flex-wrap gap-1.5">
-                {PRESET_FEELINGS.slice(0, 8).map((p) => (
+              <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
+                {PRESET_FEELINGS.map((p) => (
                   <button
                     key={p}
                     type="button"
                     onClick={() => setFeeling(p)}
+                    className="shrink-0 rounded-full border border-zinc-600 bg-zinc-800/80 px-2.5 py-1.5 text-[11px] text-zinc-300 transition hover:border-cyan-500/50 hover:bg-cyan-500/10 hover:text-cyan-400"
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                Thinking quick picks
+              </label>
+              <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
+                {PRESET_THINKING.map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setThinking(p)}
                     className="shrink-0 rounded-full border border-zinc-600 bg-zinc-800/80 px-2.5 py-1.5 text-[11px] text-zinc-300 transition hover:border-cyan-500/50 hover:bg-cyan-500/10 hover:text-cyan-400"
                   >
                     {p}

@@ -42,8 +42,36 @@ const BACKGROUNDS = [
   { id: "neon_mesh", label: "Neon mesh" },
   { id: "ocean_depth", label: "Ocean depth" },
   { id: "aurora", label: "Aurora" },
+  { id: "gold_rush", label: "Gold rush" },
+  { id: "gradient_chaos", label: "Gradient chaos" },
   { id: "upload", label: "Upload your own" },
 ] as const;
+
+const CAPTION_PRESETS = [
+  "When the chart does the thing and you're still holding",
+  "POV: You aped after the KOL said 'this is the one'",
+  "Reject utility. Embrace bonding curve.",
+  "It's not a rug. It's a 'correction'.",
+  "1 SOL to launch. Infinite dreams to lose.",
+  "We're not early. We're not late. We're unhinged.",
+  "NFA but we're not selling",
+  "Diamond hands till zero or hero",
+  "Ser. This is fine.",
+  "Virgin: sells at ATH. Chad: buys the dip.",
+  "Aping at 3am hits different",
+  "LP burned. Community based. Chart doing chart things.",
+  "When you explain your bags to a normie",
+  "The only roadmap is up. Or down. No one knows.",
+  "GM. We're so back.",
+  "Paper hands sold. I'm still here.",
+  "Touch grass? Building on Solana.",
+  "WAGMI. Probably.",
+  "Dev: No utility. Community: So based.",
+];
+
+const TOP_TEXT_PRESETS = ["Reading the whitepaper", "Selling at the top", "Caring about fundamentals", "Asking for alpha", "Paper hands", "Reject degen"];
+
+const BOTTOM_TEXT_PRESETS = ["Ape in anyway", "Buy the dip", "Just vibes", "NFA but sending it", "Diamond hands", "Embrace chaos"];
 
 function drawBackground(
   ctx: CanvasRenderingContext2D,
@@ -107,6 +135,19 @@ function drawBackground(
       g.addColorStop(0.3, "#14532d");
       g.addColorStop(0.5, "#064e3b");
       g.addColorStop(0.8, "#134e4a");
+      g.addColorStop(1, "#0d0d14");
+      break;
+    case "gold_rush":
+      g.addColorStop(0, "#1c1917");
+      g.addColorStop(0.3, "#422006");
+      g.addColorStop(0.6, "#a16207");
+      g.addColorStop(1, "#0d0d14");
+      break;
+    case "gradient_chaos":
+      g.addColorStop(0, "#7c2d12");
+      g.addColorStop(0.3, "#ea580c");
+      g.addColorStop(0.5, "#4c1d95");
+      g.addColorStop(0.8, "#0369a1");
       g.addColorStop(1, "#0d0d14");
       break;
     default:
@@ -795,7 +836,7 @@ export default function KOLSection() {
                     }`}
                   >
                     {mode === "template" && "Template"}
-                    {mode === "capybara" && "$MATE Capybara"}
+                    {mode === "capybara" && "Commander MATE"}
                     {mode === "upload" && "Upload photo"}
                     {mode === "trending" && "From trends"}
                   </button>
@@ -982,7 +1023,7 @@ export default function KOLSection() {
             )}
 
             <div className="mb-3">
-              <label className="mb-1.5 block text-xs font-medium text-zinc-400">Add $MATE Capybara (sticker)</label>
+              <label className="mb-1.5 block text-xs font-medium text-zinc-400">Add Commander MATE (sticker)</label>
               <div className="flex flex-wrap gap-1.5">
                 <button
                   type="button"
@@ -1008,7 +1049,7 @@ export default function KOLSection() {
                   >
                     <img
                       src={`/capybara-faces/capybara-${n}.png`}
-                      alt={`Capybara ${n}`}
+                      alt={`Commander MATE ${n}`}
                       className="h-full w-full object-cover"
                     />
                   </button>
@@ -1047,6 +1088,13 @@ export default function KOLSection() {
                     placeholder="Reject / Bad take"
                     className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-2.5 py-1.5 font-mono text-xs text-cyan-200 placeholder-zinc-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
                   />
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {TOP_TEXT_PRESETS.map((t) => (
+                      <button key={t} type="button" onClick={() => setTopText(t)} className="rounded border border-zinc-600 bg-zinc-800/80 px-1.5 py-0.5 text-[10px] text-zinc-500 hover:border-cyan-500/50 hover:text-cyan-400">
+                        {t}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div>
                   <label className="mb-1 block text-xs text-zinc-400">Bottom (approve / good)</label>
@@ -1057,6 +1105,13 @@ export default function KOLSection() {
                     placeholder="Ape in anyway"
                     className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-2.5 py-1.5 font-mono text-xs text-cyan-200 placeholder-zinc-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
                   />
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {BOTTOM_TEXT_PRESETS.map((t) => (
+                      <button key={t} type="button" onClick={() => setBottomText(t)} className="rounded border border-zinc-600 bg-zinc-800/80 px-1.5 py-0.5 text-[10px] text-zinc-500 hover:border-cyan-500/50 hover:text-cyan-400">
+                        {t}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <p className="sm:col-span-2 text-[10px] text-zinc-500">
                   Classic meme format: top = cringe, bottom = based. Use for Drake, Two buttons, etc.
@@ -1072,6 +1127,19 @@ export default function KOLSection() {
                   rows={2}
                   className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-2.5 py-1.5 font-mono text-xs text-cyan-200 placeholder-zinc-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
                 />
+                <label className="mt-2 mb-1 block text-[10px] text-zinc-500">Caption quick picks</label>
+                <div className="flex flex-wrap gap-1.5 max-h-20 overflow-y-auto">
+                  {CAPTION_PRESETS.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setCustomCaption(c)}
+                      className="shrink-0 rounded-full border border-zinc-600 bg-zinc-800/80 px-2 py-1 text-[10px] text-zinc-400 transition hover:border-cyan-500/50 hover:bg-cyan-500/10 hover:text-cyan-400"
+                    >
+                      {c.length > 32 ? c.slice(0, 32) + "…" : c}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 

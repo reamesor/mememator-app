@@ -4,12 +4,9 @@ import Link from "next/link";
 import { Zap, Rocket, Radio, Flame, Sparkles } from "lucide-react";
 
 const MANIFESTO_LINES = [
-  "See Solana",
-  "trends.",
-  "Create",
-  "memes.",
-  "Launch",
-  "tokens.",
+  "Spot the alpha.",
+  "Forge the meme.",
+  "Launch the bag.",
 ];
 
 const UTILITY_CARDS = [
@@ -78,19 +75,18 @@ export default function UtilityPage() {
         <section className="mb-12 text-center">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-400">
             <Zap className="h-3.5 w-3.5" />
-            Meme-to-market engine
+            Lore → Meme → Launch
           </div>
-          <h1 className="mb-4 font-display text-2xl font-bold tracking-tight text-white sm:text-3xl md:text-4xl">
+          <h1 className="mb-4 font-display text-2xl font-bold tracking-tight text-white sm:text-3xl md:text-4xl md:text-5xl">
             {MANIFESTO_LINES.map((line, i) => (
-              <span key={i}>
+              <span key={i} className="block">
                 {line}
-                <br />
               </span>
             ))}
           </h1>
           <p className="mx-auto max-w-lg text-center text-sm leading-relaxed text-zinc-400 sm:text-base">
-            Oversee what&apos;s hot on Solana from Twitter and chain data. Make content that hits. Launch meme tokens and chase the bag.{" "}
-            <span className="font-semibold text-amber-400/90">Pure retardation, full send.</span>
+            Alpha from chain data and CT. Memes that actually hit. Tokens that launch.{" "}
+            <span className="font-semibold text-amber-400/90">Chaos to capital. Full send.</span>
           </p>
         </section>
 

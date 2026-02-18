@@ -7,7 +7,7 @@ export default function LoreSectionCyberNoir() {
   const lorePoints = [
     {
       title: "THE AWAKENING",
-      text: "The $MATE Capybara rose when the gas fees were highest and the vibes were lowest.",
+      text: "Commander MATE rose when the gas fees were highest and the vibes were lowest.",
     },
     {
       title: "THE PHILOSOPHY",

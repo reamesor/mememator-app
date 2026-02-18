@@ -137,7 +137,7 @@ export default function SpaceCapybaraHero() {
           key={`float-${p.i}`}
           type="button"
           onClick={handleCapybaraClick}
-          title="Click for more capybaras"
+          title="Click for more Commander MATE"
           className="absolute z-[5] cursor-pointer touch-manipulation rounded-full transition-[box-shadow] duration-200 hover:shadow-[0_0_20px_rgba(34,211,238,0.35)]"
           style={{
             ...(p.left != null ? { left: p.left } : { right: p.right }),

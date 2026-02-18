@@ -189,7 +189,7 @@ export default function ForgePage() {
             </RetroCard>
           )}
           <RetroCard className="space-y-3 p-3 sm:p-4">
-            <h2 className="font-pixel text-[10px] text-cyan-400">Capybara Faces</h2>
+            <h2 className="font-pixel text-[10px] text-cyan-400">Commander MATE Faces</h2>
             <p className="font-pixel text-[8px] text-zinc-500">Click to use as base image</p>
             <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-5">
               {CAPYBARA_FACES.map((src, i) => (
@@ -199,7 +199,7 @@ export default function ForgePage() {
                   onClick={() => setDroppedImage(src)}
                   className="aspect-square overflow-hidden rounded border border-zinc-700 hover:border-cyan-400/50 focus:border-cyan-400/50 focus:outline-none"
                 >
-                  <img src={src} alt={`Capybara ${i + 1}`} className="h-full w-full object-cover" />
+                  <img src={src} alt={`Commander MATE ${i + 1}`} className="h-full w-full object-cover" />
                 </button>
               ))}
             </div>
