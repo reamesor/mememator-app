@@ -53,10 +53,10 @@ function PurposeBlock() {
             Why Mememator?
           </p>
           <p className="mt-1 text-sm leading-snug text-zinc-300 sm:text-base">
-            Stop burning out on lore—just bank on the launch. We turn{" "}
-            <span className={hover ? "text-amber-400/90" : "text-zinc-400"}>terminal brainrot</span>
-            {" "}into a professional forge where{" "}
-            <span className="font-semibold text-cyan-400">chaos meets capital.</span>
+            We help{" "}
+            <span className={hover ? "text-amber-400/90" : "text-zinc-400"}>launcher wannabes</span>
+            {" "}have an easy launch. Turn memes into tokens—no gatekeeping, just{" "}
+            <span className="font-semibold text-cyan-400">meme → forge → pump.</span>
           </p>
           <p className="mt-1.5 text-[10px] text-zinc-500 sm:text-xs">
             <span className="text-cyan-400/80">Lore</span> → <span className="text-cyan-400/80">Meme</span> → <span className="text-cyan-400/80">Forge</span> → <span className="text-cyan-400/80">Pump</span>. Hot topics, KOL memes, token lore, Commander MATE faces, one-click launch. We got you.
@@ -144,7 +144,7 @@ export default function AppWithEntry() {
           {/* Purpose block + tagline */}
           <div className="container-tight px-4 pt-6 pb-4 sm:px-6">
             <p className="text-center text-xs text-zinc-500 sm:text-sm">
-              Trends · Create · Launch. Pick a section below or use the menu above.
+              Trends · Create · Launch. Easy launch for launcher wannabes. Pick a section below or use the menu above.
             </p>
             <PurposeBlock />
           </div>

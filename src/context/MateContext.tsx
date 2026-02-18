@@ -5,6 +5,8 @@ import { createContext, useContext, useState, useCallback, ReactNode } from "rea
 const MATE_UNLOCK_STYLE = 50_000;
 const FORGE_MASTER = 100_000;
 const BURN_FEE_LAUNCH = 500;
+const BURN_FEE_LORE = 100;
+const BURN_FEE_MEME = 100;
 
 type MateContextType = {
   balance: number;
@@ -12,7 +14,14 @@ type MateContextType = {
   canUseHighResOrDeepFried: boolean;
   isForgeMaster: boolean;
   burnFeeLaunch: number;
+  burnFeeLore: number;
+  burnFeeMeme: number;
   burnForLaunch: () => void;
+  burnForLore: () => void;
+  burnForMeme: () => void;
+  canAffordLaunch: boolean;
+  canAffordLore: boolean;
+  canAffordMeme: boolean;
 };
 
 const MateContext = createContext<MateContextType | null>(null);
@@ -22,9 +31,20 @@ export function MateProvider({ children }: { children: ReactNode }) {
 
   const canUseHighResOrDeepFried = balance >= MATE_UNLOCK_STYLE;
   const isForgeMaster = balance >= FORGE_MASTER;
+  const canAffordLaunch = balance >= BURN_FEE_LAUNCH;
+  const canAffordLore = balance >= BURN_FEE_LORE;
+  const canAffordMeme = balance >= BURN_FEE_MEME;
 
   const burnForLaunch = useCallback(() => {
     setBalance((b) => Math.max(0, b - BURN_FEE_LAUNCH));
+  }, []);
+
+  const burnForLore = useCallback(() => {
+    setBalance((b) => Math.max(0, b - BURN_FEE_LORE));
+  }, []);
+
+  const burnForMeme = useCallback(() => {
+    setBalance((b) => Math.max(0, b - BURN_FEE_MEME));
   }, []);
 
   return (
@@ -35,7 +55,14 @@ export function MateProvider({ children }: { children: ReactNode }) {
         canUseHighResOrDeepFried,
         isForgeMaster,
         burnFeeLaunch: BURN_FEE_LAUNCH,
+        burnFeeLore: BURN_FEE_LORE,
+        burnFeeMeme: BURN_FEE_MEME,
         burnForLaunch,
+        burnForLore,
+        burnForMeme,
+        canAffordLaunch,
+        canAffordLore,
+        canAffordMeme,
       }}
     >
       {children}

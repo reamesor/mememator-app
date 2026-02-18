@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { MateProvider } from "@/context/MateContext";
 import { ForgeDraftProvider } from "@/context/ForgeDraftContext";
+import { CreationHistoryProvider } from "@/context/CreationHistoryContext";
 import SolanaWalletProvider from "@/providers/SolanaWalletProvider";
 import InteractiveBackground from "@/components/ui/InteractiveBackground";
 import FloatingCapybaraFaces from "@/components/ui/FloatingCapybaraFaces";
@@ -9,7 +10,7 @@ import FloatingCapybaraFaces from "@/components/ui/FloatingCapybaraFaces";
 export const metadata: Metadata = {
   title: "Mememator $MATE — Solana Meme-to-Market Engine",
   description:
-    "The Forge. Create memes. Launch to Pump.fun. Based.",
+    "Mememator helps launcher wannabes turn memes into tokens—easy launch to Pump.fun. Lore, meme, forge, launch.",
 };
 
 export const viewport: Viewport = {
@@ -31,7 +32,9 @@ export default function RootLayout({
         <div className="relative z-10">
           <SolanaWalletProvider>
             <MateProvider>
-              <ForgeDraftProvider>{children}</ForgeDraftProvider>
+              <CreationHistoryProvider>
+                <ForgeDraftProvider>{children}</ForgeDraftProvider>
+              </CreationHistoryProvider>
             </MateProvider>
           </SolanaWalletProvider>
         </div>

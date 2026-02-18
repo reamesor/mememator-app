@@ -4,6 +4,9 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { kols, politicalFigures, wellKnownPeople, memeAnimals, memeSymbols, hotTopics, memecoinTrends } from "@/lib/mockData";
 import { useForgeDraft } from "@/context/ForgeDraftContext";
+import { useCreationHistory } from "@/context/CreationHistoryContext";
+import { useMate } from "@/context/MateContext";
+import BurnConfirmModal from "@/components/ui/BurnConfirmModal";
 import type { MemeSubject, MemeSubjectCategory, CryptoSentiment } from "@/lib/types";
 import {
   VISUAL_STYLE_TAGS,
@@ -200,6 +203,7 @@ function getSubjectName(subject: MemeSubject): string {
   if (subject.category === "well_known") return wellKnownPeople.find((w) => w.id === subject.id)?.name ?? "Unknown";
   if (subject.category === "animals") return memeAnimals.find((a) => a.id === subject.id)?.name ?? "Unknown";
   if (subject.category === "symbols") return memeSymbols.find((s) => s.id === subject.id)?.name ?? "Unknown";
+  if (subject.category === "custom") return "My image";
   return "Unknown";
 }
 
@@ -209,10 +213,12 @@ function getSubjectQuote(subject: MemeSubject): string | undefined {
   if (subject.category === "well_known") return wellKnownPeople.find((w) => w.id === subject.id)?.sampleQuote;
   if (subject.category === "animals") return memeAnimals.find((a) => a.id === subject.id)?.suggestedCaption;
   if (subject.category === "symbols") return memeSymbols.find((s) => s.id === subject.id)?.suggestedCaption;
+  if (subject.category === "custom") return "Add your caption below";
   return undefined;
 }
 
 function getSuggestedCaption(subject: MemeSubject): string {
+  if (subject.category === "custom") return "Reject normie takes | Embrace your meme";
   if (subject.category === "animals") return memeAnimals.find((a) => a.id === subject.id)?.suggestedCaption ?? "Animal meme";
   if (subject.category === "symbols") return memeSymbols.find((s) => s.id === subject.id)?.suggestedCaption ?? "Vibes";
   const name = getSubjectName(subject);
@@ -223,10 +229,28 @@ function getSuggestedCaption(subject: MemeSubject): string {
   return `When ${name} appears on the timeline and your portfolio has a panic attack`;
 }
 
+type MemeExportAction = "download" | "copy" | "send";
+
 export default function KOLSection() {
   const router = useRouter();
   const { setMemeDraft } = useForgeDraft();
+  const { addMeme } = useCreationHistory();
+  const { burnFeeMeme, burnForMeme, canAffordMeme } = useMate();
+  const [memeBurnModalOpen, setMemeBurnModalOpen] = useState(false);
+  const [pendingMemeAction, setPendingMemeAction] = useState<MemeExportAction | null>(null);
   const [subjectType, setSubjectType] = useState<MemeSubjectCategory>("kol");
+  const [searchInput, setSearchInput] = useState("");
+  const [twitterLinkInput, setTwitterLinkInput] = useState("");
+  const [twitterSuggestion, setTwitterSuggestion] = useState<{
+    handle: string;
+    category: string;
+    categoryReason?: string;
+    memePotential: string;
+    memeIdeas: string[];
+    suggestedTemplates: string[];
+  } | null>(null);
+  const [twitterLoading, setTwitterLoading] = useState(false);
+  const [twitterError, setTwitterError] = useState<string | null>(null);
   const [wellKnownFilter, setWellKnownFilter] = useState<CryptoSentiment | "all">("all");
   const [controversialOnly, setControversialOnly] = useState(false);
   const [subject, setSubject] = useState<MemeSubject | null>(null);
@@ -450,7 +474,7 @@ export default function KOLSection() {
     if (subject && (layout === "one_panel" ? captionToUse : true)) drawMeme();
   }, [subject, captionToUse, topToUse, bottomToUse, memeTemplate, visualStyle, vibe, layout, capybaraOverlay, backgroundId, mainCharacterMode, mainCharacterCapybara, uploadedImage, trendingOption, backgroundUpload, topTextPosition, bottomTextPosition, captionPosition, fontId]);
 
-  const handleDownload = () => {
+  const doDownload = () => {
     const canvas = canvasRef.current;
     if (!canvas || !subject) return;
     drawMeme();
@@ -461,7 +485,7 @@ export default function KOLSection() {
     a.click();
   };
 
-  const handleCopyImage = async () => {
+  const doCopyImage = async () => {
     const canvas = canvasRef.current;
     if (!canvas || !subject) return;
     drawMeme();
@@ -473,7 +497,7 @@ export default function KOLSection() {
     }
   };
 
-  const handleSendToForge = () => {
+  const doSendToForge = () => {
     const canvas = canvasRef.current;
     if (!canvas || !subject) return;
     drawMeme();
@@ -482,16 +506,37 @@ export default function KOLSection() {
       layout === "two_panel"
         ? [topToUse, bottomToUse].filter(Boolean).join(" | ")
         : captionToUse;
+    const subjectName = getSubjectName(subject);
     setMemeDraft({
       imageDataUrl,
       templateName: memeTemplate,
       topText: layout === "two_panel" ? topToUse : undefined,
       bottomText: layout === "two_panel" ? bottomToUse : undefined,
       caption: caption || undefined,
-      subjectName: getSubjectName(subject),
+      subjectName,
     });
+    addMeme({ imageDataUrl, caption: caption || undefined, tokenName: subjectName });
     router.push("/forge");
   };
+
+  const requestMemeExport = (action: MemeExportAction) => {
+    if (!canAffordMeme) return; // Buttons are disabled when !canAffordMeme
+    setPendingMemeAction(action);
+    setMemeBurnModalOpen(true);
+  };
+
+  const handleMemeBurnConfirm = () => {
+    if (!pendingMemeAction) return;
+    burnForMeme();
+    if (pendingMemeAction === "download") doDownload();
+    else if (pendingMemeAction === "copy") doCopyImage();
+    else if (pendingMemeAction === "send") doSendToForge();
+    setPendingMemeAction(null);
+  };
+
+  const handleDownload = () => requestMemeExport("download");
+  const handleCopyImage = () => requestMemeExport("copy");
+  const handleSendToForge = () => requestMemeExport("send");
 
   const filteredWellKnown = wellKnownPeople
     .filter((w) => (wellKnownFilter === "all" ? true : w.cryptoSentiment === wellKnownFilter))
@@ -500,6 +545,112 @@ export default function KOLSection() {
   const handleSelectSubject = (category: MemeSubjectCategory, id: string) => {
     setSubject({ category, id });
   };
+
+  const handleAnalyzeTwitter = async () => {
+    const input = twitterLinkInput.trim();
+    if (!input) return;
+    setTwitterLoading(true);
+    setTwitterError(null);
+    setTwitterSuggestion(null);
+    try {
+      const res = await fetch("/api/suggest-meme-from-twitter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ twitterLink: input }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Analysis failed");
+      setTwitterSuggestion({
+        handle: data.handle,
+        category: data.category,
+        categoryReason: data.categoryReason,
+        memePotential: data.memePotential,
+        memeIdeas: data.memeIdeas ?? [],
+        suggestedTemplates: data.suggestedTemplates ?? [],
+      });
+    } catch (e) {
+      setTwitterError(e instanceof Error ? e.message : "Could not analyze. Try again.");
+    } finally {
+      setTwitterLoading(false);
+    }
+  };
+
+  // Unified search: flatten all subjects for cross-category search
+  const searchQuery = searchInput.trim().toLowerCase();
+  const allSubjects: Array<{
+    category: MemeSubjectCategory;
+    categoryLabel: string;
+    id: string;
+    name: string;
+    searchable: string;
+    quality: "Great pick" | "Solid" | "Classic";
+    nicheOrTheme?: string;
+    handle?: string;
+    followers?: string;
+    sampleQuote?: string;
+    suggestedCaption?: string;
+    role?: string;
+  }> = [
+    ...kols.map((k) => ({
+      category: "kol" as const,
+      categoryLabel: "KOL",
+      id: k.id,
+      name: k.name,
+      searchable: `${k.name} ${k.handle} ${k.niche} ${k.sampleQuote ?? ""}`.toLowerCase(),
+      quality: (k.memePotential === "Unhinged" ? "Great pick" : "Solid") as "Great pick" | "Solid",
+      nicheOrTheme: k.niche,
+      handle: k.handle,
+      followers: k.followers,
+      sampleQuote: k.sampleQuote,
+    })),
+    ...politicalFigures.map((p) => ({
+      category: "politics" as const,
+      categoryLabel: "Politics",
+      id: p.id,
+      name: p.name,
+      searchable: `${p.name} ${p.handle ?? ""} ${p.role} ${p.sampleQuote ?? ""}`.toLowerCase(),
+      quality: (p.memePotential === "Very High" ? "Great pick" : "Solid") as "Great pick" | "Solid",
+      nicheOrTheme: p.role,
+      handle: p.handle,
+      sampleQuote: p.sampleQuote,
+    })),
+    ...filteredWellKnown.map((w) => ({
+      category: "well_known" as const,
+      categoryLabel: "Well-known",
+      id: w.id,
+      name: w.name,
+      searchable: `${w.name} ${w.handle ?? ""} ${w.role} ${w.sampleQuote ?? ""} ${w.cryptoSentiment}`.toLowerCase(),
+      quality: (w.memePotential === "Very High" ? "Great pick" : "Solid") as "Great pick" | "Solid",
+      nicheOrTheme: w.role,
+      handle: w.handle,
+      sampleQuote: w.sampleQuote,
+    })),
+    ...memeAnimals.map((a) => ({
+      category: "animals" as const,
+      categoryLabel: "Animal",
+      id: a.id,
+      name: a.name,
+      searchable: `${a.name} ${a.theme} ${a.suggestedCaption}`.toLowerCase(),
+      quality: "Classic" as const,
+      nicheOrTheme: a.theme,
+      suggestedCaption: a.suggestedCaption,
+    })),
+    ...memeSymbols.map((s) => ({
+      category: "symbols" as const,
+      categoryLabel: "Symbol",
+      id: s.id,
+      name: s.name,
+      searchable: `${s.name} ${s.theme} ${s.suggestedCaption}`.toLowerCase(),
+      quality: "Classic" as const,
+      nicheOrTheme: s.theme,
+      suggestedCaption: s.suggestedCaption,
+    })),
+    { category: "custom" as const, categoryLabel: "Custom", id: "upload", name: "Your image", searchable: "custom your image upload", quality: "Classic" as const, nicheOrTheme: "Upload your own", suggestedCaption: "Add your caption" },
+  ];
+
+  const searchResults = searchQuery
+    ? allSubjects.filter((s) => s.searchable.includes(searchQuery))
+    : [];
 
   return (
     <section id="kols" className="scroll-mt-20 py-5 px-3 sm:py-8 sm:px-4">
@@ -511,6 +662,107 @@ export default function KOLSection() {
           KOLs, politicians, animals, and symbols. Pick a vibe, choose a template, add your text. Download or copy, then use for token launches and CT.
         </p>
 
+        <div className="mb-4">
+          <div className="relative">
+            <input
+              type="search"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="Search by name, handle, niche, theme..."
+              className="w-full rounded-lg border border-zinc-700 bg-zinc-800/80 px-4 py-2.5 pl-9 text-sm text-zinc-200 placeholder-zinc-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              aria-label="Search meme templates"
+            />
+            <svg className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          {searchInput && (
+            <p className="mt-1.5 text-[10px] text-zinc-500">
+              {searchResults.length} result{searchResults.length !== 1 ? "s" : ""} — category & meme potential shown on each card
+            </p>
+          )}
+        </div>
+
+        <div className="mb-4 rounded-lg border border-zinc-800 bg-zinc-900/30 p-3">
+          <p className="mb-2 text-[10px] font-medium uppercase text-zinc-500">
+            Or paste a Twitter/X link
+          </p>
+          <p className="mb-2 text-[10px] text-zinc-500">
+            Mememator analyzes the account and suggests: category, meme potential, and concrete meme ideas.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <input
+              type="text"
+              value={twitterLinkInput}
+              onChange={(e) => { setTwitterLinkInput(e.target.value); setTwitterError(null); }}
+              placeholder="twitter.com/username or @handle"
+              className="min-w-[200px] flex-1 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              aria-label="Twitter URL or handle"
+              onKeyDown={(e) => e.key === "Enter" && handleAnalyzeTwitter()}
+            />
+            <button
+              type="button"
+              onClick={handleAnalyzeTwitter}
+              disabled={twitterLoading}
+              className="rounded-lg bg-cyan-500/20 px-4 py-2 text-xs font-medium text-cyan-400 transition hover:bg-cyan-500/30 disabled:opacity-50"
+            >
+              {twitterLoading ? "Analyzing…" : "Analyze"}
+            </button>
+          </div>
+          {twitterError && (
+            <p className="mt-2 text-[10px] text-red-400">{twitterError}</p>
+          )}
+          {twitterSuggestion && (
+            <div className="mt-3 space-y-2 rounded border border-cyan-500/20 bg-cyan-500/5 p-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <a
+                  href={`https://twitter.com/${twitterSuggestion.handle.replace("@", "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-semibold text-cyan-400 hover:underline"
+                >
+                  {twitterSuggestion.handle}
+                </a>
+                <span className="rounded-full bg-zinc-700 px-1.5 py-0.5 text-[9px] text-zinc-400">
+                  {twitterSuggestion.category}
+                </span>
+                <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-medium ${
+                  twitterSuggestion.memePotential === "Great pick" ? "bg-cyan-500/20 text-cyan-400" : "bg-amber-500/20 text-amber-400"
+                }`}>
+                  {twitterSuggestion.memePotential}
+                </span>
+              </div>
+              {twitterSuggestion.categoryReason && (
+                <p className="text-[10px] text-zinc-400">{twitterSuggestion.categoryReason}</p>
+              )}
+              {twitterSuggestion.suggestedTemplates?.length > 0 && (
+                <p className="text-[10px] text-zinc-500">
+                  Suggested templates: {twitterSuggestion.suggestedTemplates.join(", ")}
+                </p>
+              )}
+              <div className="pt-2">
+                <p className="mb-1.5 text-[10px] font-medium text-zinc-400">Meme ideas — copy & use</p>
+                <div className="space-y-1.5">
+                  {twitterSuggestion.memeIdeas.map((idea, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <p className="flex-1 rounded border border-zinc-700 bg-zinc-800/80 px-2 py-1.5 text-[10px] italic text-zinc-300">
+                        {idea}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => navigator.clipboard.writeText(idea)}
+                        className="shrink-0 rounded border border-zinc-600 px-2 py-1 text-[9px] text-zinc-400 hover:border-cyan-500/50 hover:text-cyan-400"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
         <div className="mb-4 flex flex-wrap gap-1.5">
           {(
             [
@@ -519,6 +771,7 @@ export default function KOLSection() {
               { value: "well_known" as const, label: "Well-known" },
               { value: "animals" as const, label: "Animals" },
               { value: "symbols" as const, label: "Symbols" },
+              { value: "custom" as const, label: "Your image" },
             ] as const
           ).map(({ value, label }) => (
             <button
@@ -567,6 +820,77 @@ export default function KOLSection() {
           </div>
         )}
 
+        {searchQuery ? (
+          <div className="space-y-4">
+            {searchResults.length > 0 ? (
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {searchResults.map((s) => (
+                  <div
+                    key={`${s.category}-${s.id}`}
+                    className="card-hover rounded-lg border border-zinc-800 bg-zinc-900/50 p-3"
+                  >
+                    <div className="mb-1 flex flex-wrap items-center justify-between gap-1.5">
+                      <span className="text-sm font-semibold text-zinc-100">{s.name}</span>
+                      <div className="flex flex-wrap gap-1">
+                        <span
+                          className={`rounded-full px-1.5 py-0.5 text-[9px] font-medium ${
+                            s.quality === "Great pick"
+                              ? "bg-cyan-500/20 text-cyan-400"
+                              : s.quality === "Solid"
+                                ? "bg-amber-500/20 text-amber-400"
+                                : "bg-emerald-500/20 text-emerald-400"
+                          }`}
+                        >
+                          {s.quality}
+                        </span>
+                        <span className="rounded-full bg-zinc-700 px-1.5 py-0.5 text-[9px] text-zinc-400">
+                          {s.categoryLabel}
+                        </span>
+                      </div>
+                    </div>
+                    {s.handle && (
+                      <a
+                        href={`https://twitter.com/${s.handle.replace("@", "")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mb-1 block text-xs text-cyan-400 hover:underline"
+                      >
+                        {s.handle}
+                      </a>
+                    )}
+                    {s.nicheOrTheme && (
+                      <p className="mb-1 text-xs text-zinc-500">
+                        {s.category === "kol" || s.category === "politics" || s.category === "well_known"
+                          ? `Niche/role: ${s.nicheOrTheme}`
+                          : `Theme: ${s.nicheOrTheme}`}
+                      </p>
+                    )}
+                    {s.followers && <p className="mb-1 text-[10px] text-zinc-600">Followers: {s.followers}</p>}
+                    {(s.sampleQuote || s.suggestedCaption) && (
+                      <p className="mb-2 line-clamp-2 rounded border-l-2 border-zinc-600 bg-zinc-800/50 px-2 py-1 text-[10px] italic text-zinc-400">
+                        &ldquo;{s.sampleQuote ?? s.suggestedCaption}&rdquo;
+                      </p>
+                    )}
+                    <button
+                      onClick={() => {
+                        setSubjectType(s.category);
+                        handleSelectSubject(s.category, s.id);
+                      }}
+                      className="w-full rounded-lg bg-cyan-500/20 py-1.5 text-xs font-medium text-cyan-400 transition hover:bg-cyan-500/30"
+                    >
+                      Generate Meme
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-6 text-center text-sm text-zinc-500">
+                No templates match &ldquo;{searchInput}&rdquo;. Try another term or browse by category below.
+              </p>
+            )}
+          </div>
+        ) : (
+          <>
         {subjectType === "kol" && (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {kols.map((k) => (
@@ -574,11 +898,14 @@ export default function KOLSection() {
                 key={k.id}
                 className="card-hover rounded-lg border border-zinc-800 bg-zinc-900/50 p-3"
               >
-                <div className="mb-1 flex items-center justify-between">
+                <div className="mb-1 flex flex-wrap items-center justify-between gap-1.5">
                   <span className="text-sm font-semibold text-zinc-100">{k.name}</span>
-                  <span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[10px] text-amber-400">
-                    {k.memePotential}
-                  </span>
+                  <div className="flex flex-wrap gap-1">
+                    <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-medium ${k.memePotential === "Unhinged" ? "bg-cyan-500/20 text-cyan-400" : "bg-amber-500/20 text-amber-400"}`}>
+                      {k.memePotential === "Unhinged" ? "Great pick" : "Solid"}
+                    </span>
+                    <span className="rounded-full bg-zinc-700 px-1.5 py-0.5 text-[9px] text-zinc-400">KOL</span>
+                  </div>
                 </div>
                 <a
                   href={`https://twitter.com/${k.handle.replace("@", "")}`}
@@ -613,11 +940,14 @@ export default function KOLSection() {
                 key={p.id}
                 className="card-hover rounded-lg border border-zinc-800 bg-zinc-900/50 p-3"
               >
-                <div className="mb-1 flex items-center justify-between">
+                <div className="mb-1 flex flex-wrap items-center justify-between gap-1.5">
                   <span className="text-sm font-semibold text-zinc-100">{p.name}</span>
-                  <span className="rounded-full bg-purple-500/20 px-1.5 py-0.5 text-[10px] text-purple-400">
-                    {p.memePotential}
-                  </span>
+                  <div className="flex flex-wrap gap-1">
+                    <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-medium ${p.memePotential === "Very High" ? "bg-cyan-500/20 text-cyan-400" : "bg-amber-500/20 text-amber-400"}`}>
+                      {p.memePotential === "Very High" ? "Great pick" : "Solid"}
+                    </span>
+                    <span className="rounded-full bg-purple-500/20 px-1.5 py-0.5 text-[9px] text-purple-400">Politics</span>
+                  </div>
                 </div>
                 {p.handle && (
                   <a
@@ -656,19 +986,15 @@ export default function KOLSection() {
                 <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
                   <span className="text-sm font-semibold text-zinc-100">{w.name}</span>
                   <div className="flex flex-wrap gap-1">
-                    <span
-                      className={`rounded-full px-1.5 py-0.5 text-[10px] ${
-                        w.cryptoSentiment === "loved"
-                          ? "bg-green-500/20 text-green-400"
-                          : "bg-red-500/20 text-red-400"
-                      }`}
-                    >
+                    <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-medium ${w.memePotential === "Very High" ? "bg-cyan-500/20 text-cyan-400" : "bg-amber-500/20 text-amber-400"}`}>
+                      {w.memePotential === "Very High" ? "Great pick" : "Solid"}
+                    </span>
+                    <span className="rounded-full bg-zinc-700 px-1.5 py-0.5 text-[9px] text-zinc-400">Well-known</span>
+                    <span className={`rounded-full px-1.5 py-0.5 text-[9px] ${w.cryptoSentiment === "loved" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
                       {w.cryptoSentiment === "loved" ? "Loved" : "Hated"}
                     </span>
                     {w.controversial && (
-                      <span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[10px] text-amber-400">
-                        Controversial
-                      </span>
+                      <span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[9px] text-amber-400">Controversial</span>
                     )}
                   </div>
                 </div>
@@ -706,12 +1032,14 @@ export default function KOLSection() {
                 key={a.id}
                 className="card-hover rounded-lg border border-zinc-800 bg-zinc-900/50 p-3"
               >
-                <div className="mb-1 flex items-center justify-between">
+                <div className="mb-1 flex flex-wrap items-center justify-between gap-1.5">
                   <span className="text-sm font-semibold text-zinc-100">{a.name}</span>
-                  <span className="rounded-full bg-emerald-500/20 px-1.5 py-0.5 text-[10px] text-emerald-400">
-                    {a.theme}
-                  </span>
+                  <div className="flex flex-wrap gap-1">
+                    <span className="rounded-full bg-emerald-500/20 px-1.5 py-0.5 text-[9px] text-emerald-400">Classic</span>
+                    <span className="rounded-full bg-zinc-700 px-1.5 py-0.5 text-[9px] text-zinc-400">Animal</span>
+                  </div>
                 </div>
+                <p className="mb-1 text-[10px] text-zinc-500">Theme: {a.theme}</p>
                 <p className="mb-2 line-clamp-2 text-[10px] italic text-zinc-500">{a.suggestedCaption}</p>
                 <button
                   onClick={() => handleSelectSubject("animals", a.id)}
@@ -731,12 +1059,14 @@ export default function KOLSection() {
                 key={s.id}
                 className="card-hover rounded-lg border border-zinc-800 bg-zinc-900/50 p-3"
               >
-                <div className="mb-1 flex items-center justify-between">
+                <div className="mb-1 flex flex-wrap items-center justify-between gap-1.5">
                   <span className="text-sm font-semibold text-zinc-100">{s.name}</span>
-                  <span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[10px] text-amber-400">
-                    {s.theme}
-                  </span>
+                  <div className="flex flex-wrap gap-1">
+                    <span className="rounded-full bg-emerald-500/20 px-1.5 py-0.5 text-[9px] text-emerald-400">Classic</span>
+                    <span className="rounded-full bg-zinc-700 px-1.5 py-0.5 text-[9px] text-zinc-400">Symbol</span>
+                  </div>
                 </div>
+                <p className="mb-1 text-[10px] text-zinc-500">Theme: {s.theme}</p>
                 <p className="mb-2 line-clamp-2 text-[10px] italic text-zinc-500">{s.suggestedCaption}</p>
                 <button
                   onClick={() => handleSelectSubject("symbols", s.id)}
@@ -747,6 +1077,49 @@ export default function KOLSection() {
               </div>
             ))}
           </div>
+        )}
+
+        {subjectType === "custom" && (
+          <div className="rounded-lg border-2 border-dashed border-cyan-500/40 bg-cyan-500/5 p-6">
+            <h3 className="mb-2 font-pixel text-sm font-semibold text-cyan-400">Add your own image</h3>
+            <p className="mb-4 font-pixel text-[10px] text-zinc-500">
+              Upload any image to use as the main character. Pick a template, add text, then download or send to Forge.
+            </p>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) {
+                  const url = URL.createObjectURL(f);
+                  setUploadedImage(url);
+                  setMainCharacterMode("upload");
+                  handleSelectSubject("custom", "upload");
+                }
+              }}
+              className="block w-full text-[10px] text-zinc-400 file:mr-2 file:rounded-lg file:border-0 file:bg-cyan-500/20 file:px-4 file:py-2.5 file:font-pixel file:text-xs file:font-medium file:text-cyan-400 hover:file:bg-cyan-500/30"
+            />
+            {uploadedImage && (
+              <div className="mt-4 flex items-center gap-2">
+                <img src={uploadedImage} alt="Your upload" className="h-16 w-16 shrink-0 rounded border border-zinc-700 object-cover" />
+                <div>
+                  <p className="font-pixel text-[10px] text-zinc-400">Image loaded.</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMainCharacterMode("upload");
+                      handleSelectSubject("custom", "upload");
+                    }}
+                    className="mt-1 font-pixel text-[10px] text-cyan-400 hover:underline"
+                  >
+                    Generate meme below →
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+          </>
         )}
 
         {subject && (
@@ -1157,19 +1530,25 @@ export default function KOLSection() {
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={handleDownload}
-                className="rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-medium text-zinc-950 hover:bg-cyan-400"
+                disabled={!canAffordMeme}
+                title={!canAffordMeme ? `Need ${burnFeeMeme} $MATE to export` : undefined}
+                className="rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-medium text-zinc-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-cyan-500"
               >
                 Download PNG
               </button>
               <button
                 onClick={handleCopyImage}
-                className="rounded-lg bg-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-200 hover:bg-zinc-600"
+                disabled={!canAffordMeme}
+                title={!canAffordMeme ? `Need ${burnFeeMeme} $MATE to export` : undefined}
+                className="rounded-lg bg-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-200 hover:bg-zinc-600 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Copy image
               </button>
               <button
                 onClick={handleSendToForge}
-                className="rounded-lg border border-cyan-500/60 bg-cyan-500/10 px-3 py-1.5 text-xs font-medium text-cyan-400 hover:bg-cyan-500/20"
+                disabled={!canAffordMeme}
+                title={!canAffordMeme ? `Need ${burnFeeMeme} $MATE to export` : undefined}
+                className="rounded-lg border border-cyan-500/60 bg-cyan-500/10 px-3 py-1.5 text-xs font-medium text-cyan-400 hover:bg-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Send to Forge
               </button>
@@ -1183,6 +1562,23 @@ export default function KOLSection() {
           </div>
         )}
       </div>
+      <BurnConfirmModal
+        open={memeBurnModalOpen}
+        onClose={() => {
+          setMemeBurnModalOpen(false);
+          setPendingMemeAction(null);
+        }}
+        onConfirm={handleMemeBurnConfirm}
+        amount={burnFeeMeme}
+        actionLabel={
+          pendingMemeAction === "download"
+            ? "download"
+            : pendingMemeAction === "copy"
+              ? "copy"
+              : "send to Forge"
+        }
+        description={`Burn ${burnFeeMeme} $MATE to export this meme.`}
+      />
     </section>
   );
 }

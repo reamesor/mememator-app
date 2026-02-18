@@ -3,14 +3,16 @@
 import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Lock, Sparkles, X } from "lucide-react";
+import { ArrowLeft, FolderOpen, Lock, Sparkles, X } from "lucide-react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import BurnTicker from "@/components/ui/BurnTicker";
 import ChaosSlider from "@/components/ui/ChaosSlider";
 import RetroCard from "@/components/ui/RetroCard";
 import PumpLaunchModal from "@/components/ui/PumpLaunchModal";
+import CreationsModal from "@/components/ui/CreationsModal";
 import { useMate } from "@/context/MateContext";
 import { useForgeDraft } from "@/context/ForgeDraftContext";
+import { useCreationHistory } from "@/context/CreationHistoryContext";
 import { FORGE_STYLES, type ForgeStyleId } from "@/lib/forgeStyles";
 
 export default function ForgePage() {
@@ -20,6 +22,8 @@ export default function ForgePage() {
     balance,
     isForgeMaster,
     canUseHighResOrDeepFried,
+    canAffordLaunch,
+    burnFeeLaunch,
   } = useMate();
 
   const walletAddress = publicKey ? `${publicKey.toString().slice(0, 4)}...${publicKey.toString().slice(-4)}` : null;
@@ -32,15 +36,44 @@ export default function ForgePage() {
     return () => clearTimeout(t);
   }, [connected, router]);
   const { loreDraft, memeDraft, clearLoreDraft, clearMemeDraft } = useForgeDraft();
+  const { launches, memes, addLaunch, saveLastDraft, loadLastDraft, deleteLaunch, deleteMeme } = useCreationHistory();
   const [style, setStyle] = useState<ForgeStyleId>("legacy");
   const [chaos, setChaos] = useState(0);
   const [tokenName, setTokenName] = useState("");
   const [ticker, setTicker] = useState("");
   const [description, setDescription] = useState("");
   const [launchModalOpen, setLaunchModalOpen] = useState(false);
+  const [creationsModalOpen, setCreationsModalOpen] = useState(false);
   const [droppedImage, setDroppedImage] = useState<string | null>(null);
+  const [searchInput, setSearchInput] = useState("");
+  const [twitterLinkInput, setTwitterLinkInput] = useState("");
+  const [twitterSuggestion, setTwitterSuggestion] = useState<{
+    handle: string;
+    category: string;
+    categoryReason?: string;
+    memePotential: string;
+    memeIdeas: string[];
+    suggestedTemplates: string[];
+  } | null>(null);
+  const [twitterLoading, setTwitterLoading] = useState(false);
+  const [twitterError, setTwitterError] = useState<string | null>(null);
 
   const CAPYBARA_FACES = Array.from({ length: 11 }, (_, i) => `/capybara-faces/capybara-${i + 1}.png`);
+
+  const searchQuery = searchInput.trim().toLowerCase();
+  const filteredStyles = searchQuery
+    ? FORGE_STYLES.filter(
+        (s) =>
+          s.label.toLowerCase().includes(searchQuery) ||
+          s.vibeLabel.toLowerCase().includes(searchQuery) ||
+          s.visualKey.toLowerCase().includes(searchQuery)
+      )
+    : FORGE_STYLES;
+  const filteredFaceIndices = searchQuery
+    ? CAPYBARA_FACES.map((_, i) => i + 1).filter(
+        (n) => String(n).includes(searchQuery) || `face ${n}`.includes(searchQuery)
+      )
+    : null;
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -67,7 +100,60 @@ export default function ForgePage() {
     return () => window.removeEventListener("paste", handlePaste as (e: ClipboardEvent) => void);
   }, [handlePaste]);
 
+  useEffect(() => {
+    const draft = loadLastDraft();
+    if (draft) {
+      if (draft.tokenName) setTokenName(draft.tokenName);
+      if (draft.ticker) setTicker(draft.ticker);
+      if (draft.description) setDescription(draft.description);
+    }
+  }, [loadLastDraft]);
+
+  const saveDraft = useCallback(() => {
+    if (tokenName || ticker || description) {
+      saveLastDraft({ tokenName, ticker, description, style });
+    }
+  }, [tokenName, ticker, description, style, saveLastDraft]);
+
+  useEffect(() => {
+    const t = setTimeout(saveDraft, 2000);
+    return () => clearTimeout(t);
+  }, [saveDraft]);
+
   const handleLaunchClick = () => setLaunchModalOpen(true);
+
+  const handleLaunchConfirmed = useCallback(() => {
+    addLaunch({ tokenName: tokenName || "Unnamed", ticker: ticker || "???", description });
+  }, [tokenName, ticker, description, addLaunch]);
+
+  const handleAnalyzeTwitter = async () => {
+    const input = twitterLinkInput.trim();
+    if (!input) return;
+    setTwitterLoading(true);
+    setTwitterError(null);
+    setTwitterSuggestion(null);
+    try {
+      const res = await fetch("/api/suggest-meme-from-twitter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ twitterLink: input }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Analysis failed");
+      setTwitterSuggestion({
+        handle: data.handle,
+        category: data.category,
+        categoryReason: data.categoryReason,
+        memePotential: data.memePotential,
+        memeIdeas: data.memeIdeas ?? [],
+        suggestedTemplates: data.suggestedTemplates ?? [],
+      });
+    } catch (e) {
+      setTwitterError(e instanceof Error ? e.message : "Could not analyze. Try again.");
+    } finally {
+      setTwitterLoading(false);
+    }
+  };
 
   const selectedStyleDef = FORGE_STYLES.find((s) => s.id === style);
   const vibeLabel = selectedStyleDef?.vibeLabel ?? "—";
@@ -88,6 +174,15 @@ export default function ForgePage() {
             <span className="hidden sm:inline">Back to homepage</span>
           </Link>
           <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setCreationsModalOpen(true)}
+              className="flex min-h-[2.75rem] items-center gap-1.5 rounded border border-cyan-500/40 bg-cyan-500/10 px-3 py-2 font-pixel text-xs text-cyan-400 transition hover:bg-cyan-500/20 sm:text-sm"
+            >
+              <FolderOpen size={14} />
+              <span className="hidden sm:inline">My Memes & Lores</span>
+              <span className="sm:hidden">Creations</span>
+            </button>
             <span className="font-pixel text-xs text-cyan-400 sm:text-sm">$MATE: {balance.toLocaleString()}</span>
             {walletAddress && (
               <span className="hidden items-center gap-1.5 font-pixel text-xs text-zinc-400 sm:flex sm:text-sm">
@@ -113,6 +208,75 @@ export default function ForgePage() {
       <main className="container-tight flex min-h-[calc(100vh-7rem)] flex-col gap-4 p-4 sm:p-5 lg:min-h-[calc(100vh-52px-56px)] lg:flex-row lg:gap-6">
         {/* Left: Toolkit — order 1 on mobile */}
         <aside className="order-1 w-full shrink-0 space-y-4 lg:order-none lg:w-60">
+          <RetroCard className="space-y-2 p-3">
+            <div className="relative">
+              <input
+                type="search"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Search styles (Legacy, Deep-Fried, face 3...)"
+                className="w-full rounded border border-zinc-700 bg-zinc-800/80 py-2 pl-8 pr-2 font-pixel text-[10px] text-zinc-200 placeholder-zinc-500 focus:border-cyan-500 focus:outline-none"
+                aria-label="Search styles and faces"
+              />
+              <svg className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+          </RetroCard>
+
+          <RetroCard className="space-y-2 p-3">
+            <p className="font-pixel text-[9px] font-medium uppercase text-zinc-500">Paste Twitter/X link</p>
+            <p className="font-pixel text-[9px] text-zinc-500">Get meme ideas & use for token name/description.</p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={twitterLinkInput}
+                onChange={(e) => { setTwitterLinkInput(e.target.value); setTwitterError(null); }}
+                placeholder="twitter.com/username or @handle"
+                className="min-w-0 flex-1 rounded border border-zinc-700 bg-zinc-800 px-2 py-1.5 font-pixel text-[10px] text-zinc-200 placeholder-zinc-500 focus:border-cyan-500 focus:outline-none"
+                onKeyDown={(e) => e.key === "Enter" && handleAnalyzeTwitter()}
+              />
+              <button
+                type="button"
+                onClick={handleAnalyzeTwitter}
+                disabled={twitterLoading}
+                className="shrink-0 rounded border border-cyan-500/40 bg-cyan-500/10 px-2 py-1.5 font-pixel text-[10px] text-cyan-400 hover:bg-cyan-500/20 disabled:opacity-50"
+              >
+                {twitterLoading ? "…" : "Analyze"}
+              </button>
+            </div>
+            {twitterError && <p className="font-pixel text-[9px] text-red-400">{twitterError}</p>}
+            {twitterSuggestion && (
+              <div className="mt-2 space-y-1.5 rounded border border-cyan-500/20 bg-cyan-500/5 p-2">
+                <div className="flex flex-wrap items-center gap-1">
+                  <a href={`https://twitter.com/${twitterSuggestion.handle.replace("@", "")}`} target="_blank" rel="noopener noreferrer" className="font-pixel text-[10px] font-semibold text-cyan-400 hover:underline">
+                    {twitterSuggestion.handle}
+                  </a>
+                  <span className="rounded bg-zinc-700 px-1 py-0.5 font-pixel text-[8px] text-zinc-400">{twitterSuggestion.category}</span>
+                  <span className={`rounded px-1 py-0.5 font-pixel text-[8px] ${twitterSuggestion.memePotential === "Great pick" ? "bg-cyan-500/20 text-cyan-400" : "bg-amber-500/20 text-amber-400"}`}>
+                    {twitterSuggestion.memePotential}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setTokenName(twitterSuggestion.handle.replace("@", ""))}
+                    className="rounded border border-cyan-400/40 px-1.5 py-0.5 font-pixel text-[8px] text-cyan-400 hover:bg-cyan-400/10"
+                  >
+                    Use as Token Name
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDescription(twitterSuggestion.memeIdeas.join("\n\n"))}
+                    className="rounded border border-cyan-400/40 px-1.5 py-0.5 font-pixel text-[8px] text-cyan-400 hover:bg-cyan-400/10"
+                  >
+                    Use ideas as Description
+                  </button>
+                </div>
+              </div>
+            )}
+          </RetroCard>
+
           {(loreDraft || memeDraft) && (
             <RetroCard className="space-y-2.5 p-3 sm:p-4">
               <h2 className="font-pixel text-[10px] text-cyan-400">Options from Lore & Meme</h2>
@@ -203,14 +367,17 @@ export default function ForgePage() {
             <h2 className="font-pixel text-[10px] text-cyan-400">Commander MATE Faces</h2>
             <p className="font-pixel text-[8px] text-zinc-500">Click to use as base image</p>
             <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-5">
-              {CAPYBARA_FACES.map((src, i) => (
+              {(filteredFaceIndices
+                ? filteredFaceIndices.map((n) => n - 1)
+                : CAPYBARA_FACES.map((_, i) => i)
+              ).map((i) => (
                 <button
                   key={i}
                   type="button"
-                  onClick={() => setDroppedImage(src)}
+                  onClick={() => setDroppedImage(CAPYBARA_FACES[i])}
                   className="aspect-square overflow-hidden rounded border border-zinc-700 hover:border-cyan-400/50 focus:border-cyan-400/50 focus:outline-none"
                 >
-                  <img src={src} alt={`Commander MATE ${i + 1}`} className="h-full w-full object-cover" />
+                  <img src={CAPYBARA_FACES[i]} alt={`Commander MATE ${i + 1}`} className="h-full w-full object-cover" />
                 </button>
               ))}
             </div>
@@ -218,7 +385,7 @@ export default function ForgePage() {
           <RetroCard className="space-y-3 p-3 sm:p-4">
             <h2 className="font-pixel text-[10px] text-cyan-400">Style</h2>
             <div className="flex flex-wrap gap-1.5">
-              {FORGE_STYLES.map((s) => {
+              {filteredStyles.map((s) => {
                 const locked = s.lockedByTier && !canUseHighResOrDeepFried;
                 return (
                   <button
@@ -292,9 +459,55 @@ export default function ForgePage() {
         </section>
 
         {/* Right: Launchpad — order 3 on mobile */}
-        <aside className="order-3 w-full shrink-0 lg:order-none lg:w-72">
+        <aside className="order-3 w-full shrink-0 space-y-4 lg:order-none lg:w-72">
+          <RetroCard className="space-y-2 p-3">
+              <div className="flex items-center justify-between">
+                <h2 className="font-pixel text-[10px] text-cyan-400">My Creations</h2>
+                <button
+                  type="button"
+                  onClick={() => setCreationsModalOpen(true)}
+                  className="font-pixel text-[9px] text-cyan-400 hover:underline"
+                >
+                  Find all
+                </button>
+              </div>
+              <p className="font-pixel text-[9px] text-zinc-500">Pick from history — stored per wallet</p>
+              {(launches.length > 0 || memes.length > 0) ? (
+              <div className="max-h-32 space-y-1 overflow-y-auto">
+                {launches.slice(0, 5).map((l) => (
+                  <button
+                    key={l.id}
+                    type="button"
+                    onClick={() => {
+                      setTokenName(l.tokenName);
+                      setTicker(l.ticker);
+                      setDescription(l.description);
+                    }}
+                    className="flex w-full items-center gap-2 rounded border border-zinc-700 bg-zinc-800/50 p-2 text-left font-pixel text-[9px] transition hover:border-cyan-500/40 hover:bg-cyan-500/10"
+                  >
+                    <span className="truncate font-medium text-zinc-300">{l.tokenName}</span>
+                    <span className="shrink-0 text-cyan-400">{l.ticker}</span>
+                  </button>
+                ))}
+                {memes.slice(0, 3).map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => setDroppedImage(m.imageDataUrl)}
+                    className="flex w-full items-center gap-2 rounded border border-zinc-700 bg-zinc-800/50 p-1.5 text-left transition hover:border-cyan-500/40 hover:bg-cyan-500/10"
+                  >
+                    <img src={m.imageDataUrl} alt="" className="h-8 w-8 shrink-0 rounded object-cover" />
+                    <span className="truncate font-pixel text-[9px] text-zinc-400">{m.tokenName || m.caption || "Meme"}</span>
+                  </button>
+                ))}
+              </div>
+              ) : (
+                <p className="font-pixel text-[9px] text-zinc-600">No memes or lores yet. Click &quot;Find all&quot; to browse.</p>
+              )}
+            </RetroCard>
           <RetroCard className="space-y-3 p-3 sm:p-4">
             <h2 className="font-pixel text-[10px] text-cyan-400">Launchpad</h2>
+            <p className="font-pixel mb-2 text-[9px] text-zinc-500">Easy launch for launcher wannabes. Fill in, burn, redirect.</p>
             <div>
               <label className="mb-1 block font-pixel text-[10px] text-zinc-500">Token Name</label>
               <input
@@ -328,10 +541,17 @@ export default function ForgePage() {
             <button
               type="button"
               onClick={handleLaunchClick}
-              className="w-full min-h-[2.75rem] rounded border-2 border-cyan-400/60 bg-cyan-400/10 py-3 font-pixel text-[10px] text-cyan-400 hover:bg-cyan-400/20"
+              disabled={!canAffordLaunch}
+              title={!canAffordLaunch ? `Need ${burnFeeLaunch} $MATE to launch` : undefined}
+              className="w-full min-h-[2.75rem] rounded border-2 border-cyan-400/60 bg-cyan-400/10 py-3 font-pixel text-[10px] text-cyan-400 hover:bg-cyan-400/20 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-cyan-400/10"
             >
               Launch to Pump.fun
             </button>
+            {!canAffordLaunch && (
+              <p className="mt-1 font-pixel text-[9px] text-amber-400">
+                Need {burnFeeLaunch} $MATE to launch. Stake or earn more.
+              </p>
+            )}
           </RetroCard>
         </aside>
       </main>
@@ -339,9 +559,24 @@ export default function ForgePage() {
       <PumpLaunchModal
         open={launchModalOpen}
         onClose={() => setLaunchModalOpen(false)}
-        onConfirm={() => {}}
+        onConfirm={handleLaunchConfirmed}
         tokenName={tokenName || "Unnamed"}
         ticker={ticker || "???"}
+        description={description}
+      />
+      <CreationsModal
+        open={creationsModalOpen}
+        onClose={() => setCreationsModalOpen(false)}
+        launches={launches}
+        memes={memes}
+        onSelectLaunch={(l) => {
+          setTokenName(l.tokenName);
+          setTicker(l.ticker);
+          setDescription(l.description);
+        }}
+        onSelectMeme={(m) => setDroppedImage(m.imageDataUrl)}
+        deleteLaunch={deleteLaunch}
+        deleteMeme={deleteMeme}
       />
     </div>
   );

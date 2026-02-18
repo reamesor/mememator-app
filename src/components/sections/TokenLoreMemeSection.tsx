@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { launchThemes } from "@/lib/mockData";
 import { useForgeDraft } from "@/context/ForgeDraftContext";
+import { useMate } from "@/context/MateContext";
+import BurnConfirmModal from "@/components/ui/BurnConfirmModal";
 
 const LORE_TEMPLATES: Record<string, string> = {
   "Animal + Hat": "A [animal] that just needed one thing: a hat. The streets weren't ready. Solana wasn't ready. Now we're all hat-pilled. No roadmap. No utility. Just vibes and a drip that hits different. This is the way.",
@@ -27,6 +29,8 @@ const MEME_PROMPTS = [
 
 export default function TokenLoreMemeSection() {
   const { setLoreDraft } = useForgeDraft();
+  const { burnFeeLore, burnForLore, canAffordLore } = useMate();
+  const [loreBurnModalOpen, setLoreBurnModalOpen] = useState(false);
   const [tokenName, setTokenName] = useState("");
   const [themeId, setThemeId] = useState("");
   const [lore, setLore] = useState("");
@@ -72,7 +76,7 @@ export default function TokenLoreMemeSection() {
     setMemeAngle((prev) => (prev ? `${prev}\n${prompt}` : prompt));
   };
 
-  const improveWithAi = async () => {
+  const runImproveWithAi = async () => {
     setAiLoading(true);
     setAiError(null);
     setAiLoreExamples([]);
@@ -102,6 +106,20 @@ export default function TokenLoreMemeSection() {
     } finally {
       setAiLoading(false);
     }
+  };
+
+  const improveWithAi = () => {
+    if (!canAffordLore) {
+      setAiError(`Need ${burnFeeLore} $MATE to generate. Stake or earn more $MATE.`);
+      return;
+    }
+    setAiError(null);
+    setLoreBurnModalOpen(true);
+  };
+
+  const handleLoreBurnConfirm = () => {
+    burnForLore();
+    runImproveWithAi();
   };
 
   const useLoreExample = (example: string) => {
@@ -273,6 +291,14 @@ export default function TokenLoreMemeSection() {
           </div>
         </div>
       </div>
+      <BurnConfirmModal
+        open={loreBurnModalOpen}
+        onClose={() => setLoreBurnModalOpen(false)}
+        onConfirm={handleLoreBurnConfirm}
+        amount={burnFeeLore}
+        actionLabel="generate lore"
+        description={`Burn ${burnFeeLore} $MATE to improve your lore with AI.`}
+      />
     </section>
   );
 }

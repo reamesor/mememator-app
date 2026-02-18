@@ -61,12 +61,12 @@ export default function IgnitionPage() {
           </div>
 
           <p className="mb-4 max-w-md text-center font-pixel text-[10px] text-zinc-400 sm:text-xs">
-            The Forge. Create memes. Launch to Pump.fun. Based.
+            Easy launch for launcher wannabes. Create memes, burn $MATE, launch to Pump.fun. Based.
           </p>
           <ul className="font-pixel mb-6 flex flex-wrap justify-center gap-x-4 gap-y-1 text-[9px] text-zinc-500 sm:text-[10px]">
             <li>Create meme with templates & Commander MATE faces</li>
             <li>Apply style: Retro, AI-Synth, Deep-Fried</li>
-            <li>Burn $MATE & launch to Pump.fun</li>
+            <li>Burn $MATE & one-click launch to Pump.fun</li>
           </ul>
 
         <button

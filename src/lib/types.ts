@@ -31,7 +31,7 @@ export interface KOL {
   sampleQuote?: string;
 }
 
-export type MemeSubjectCategory = "kol" | "politics" | "well_known" | "animals" | "symbols";
+export type MemeSubjectCategory = "kol" | "politics" | "well_known" | "animals" | "symbols" | "custom";
 
 /** Generic option for meme subjects (animals, symbols, etc.) with suggested captions */
 export interface MemeSubjectOption {
@@ -68,7 +68,8 @@ export type MemeSubject =
   | { category: "politics"; id: string }
   | { category: "well_known"; id: string }
   | { category: "animals"; id: string }
-  | { category: "symbols"; id: string };
+  | { category: "symbols"; id: string }
+  | { category: "custom"; id: string };
 
 export interface LaunchTheme {
   id: string;
