@@ -23,9 +23,19 @@ export type MemeRecord = {
   createdAt: number;
 };
 
+export type LoreRecord = {
+  id: string;
+  tokenName: string;
+  lore: string;
+  memeAngle: string;
+  themeName?: string;
+  createdAt: number;
+};
+
 export type UserStorageData = {
   launches: LaunchRecord[];
   memes: MemeRecord[];
+  lores: LoreRecord[];
   /** Last used forge draft */
   lastDraft?: {
     tokenName: string;
@@ -38,6 +48,7 @@ export type UserStorageData = {
 
 const MAX_LAUNCHES = 50;
 const MAX_MEMES = 30;
+const MAX_LORES = 50;
 
 function getKey(walletAddress: string): string {
   return `${STORAGE_PREFIX}${walletAddress}`;
@@ -65,17 +76,31 @@ export function saveUserData(walletAddress: string | null, data: UserStorageData
   }
 }
 
+export function addLore(
+  walletAddress: string | null,
+  record: Omit<LoreRecord, "id" | "createdAt">
+): void {
+  const existing = loadUserData(walletAddress) ?? { launches: [], memes: [], lores: [], updatedAt: 0 };
+  const lore: LoreRecord = {
+    ...record,
+    id: `lore_${Date.now()}`,
+    createdAt: Date.now(),
+  };
+  existing.lores = [lore, ...(existing.lores ?? [])].slice(0, MAX_LORES);
+  saveUserData(walletAddress, existing);
+}
+
 export function addLaunch(
   walletAddress: string | null,
   record: Omit<LaunchRecord, "id" | "createdAt">
 ): void {
-  const existing = loadUserData(walletAddress) ?? { launches: [], memes: [], updatedAt: 0 };
+  const existing = loadUserData(walletAddress) ?? { launches: [], memes: [], lores: [], updatedAt: 0 };
   const launch: LaunchRecord = {
     ...record,
     id: `launch_${Date.now()}`,
     createdAt: Date.now(),
   };
-  existing.launches = [launch, ...existing.launches].slice(0, MAX_LAUNCHES);
+  existing.launches = [launch, ...(existing.launches ?? [])].slice(0, MAX_LAUNCHES);
   saveUserData(walletAddress, existing);
 }
 
@@ -83,13 +108,13 @@ export function addMeme(
   walletAddress: string | null,
   record: Omit<MemeRecord, "id" | "createdAt">
 ): void {
-  const existing = loadUserData(walletAddress) ?? { launches: [], memes: [], updatedAt: 0 };
+  const existing = loadUserData(walletAddress) ?? { launches: [], memes: [], lores: [], updatedAt: 0 };
   const meme: MemeRecord = {
     ...record,
     id: `meme_${Date.now()}`,
     createdAt: Date.now(),
   };
-  existing.memes = [meme, ...existing.memes].slice(0, MAX_MEMES);
+  existing.memes = [meme, ...(existing.memes ?? [])].slice(0, MAX_MEMES);
   saveUserData(walletAddress, existing);
 }
 
@@ -97,7 +122,7 @@ export function saveLastDraft(
   walletAddress: string | null,
   draft: UserStorageData["lastDraft"]
 ): void {
-  const existing = loadUserData(walletAddress) ?? { launches: [], memes: [], updatedAt: 0 };
+  const existing = loadUserData(walletAddress) ?? { launches: [], memes: [], lores: [], updatedAt: 0 };
   existing.lastDraft = draft;
   saveUserData(walletAddress, existing);
 }
@@ -105,13 +130,20 @@ export function saveLastDraft(
 export function deleteLaunch(walletAddress: string | null, id: string): void {
   const existing = loadUserData(walletAddress);
   if (!existing) return;
-  existing.launches = existing.launches.filter((l) => l.id !== id);
+  existing.launches = (existing.launches ?? []).filter((l) => l.id !== id);
   saveUserData(walletAddress, existing);
 }
 
 export function deleteMeme(walletAddress: string | null, id: string): void {
   const existing = loadUserData(walletAddress);
   if (!existing) return;
-  existing.memes = existing.memes.filter((m) => m.id !== id);
+  existing.memes = (existing.memes ?? []).filter((m) => m.id !== id);
+  saveUserData(walletAddress, existing);
+}
+
+export function deleteLore(walletAddress: string | null, id: string): void {
+  const existing = loadUserData(walletAddress);
+  if (!existing) return;
+  existing.lores = (existing.lores ?? []).filter((l) => l.id !== id);
   saveUserData(walletAddress, existing);
 }

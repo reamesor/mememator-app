@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { launchThemes } from "@/lib/mockData";
 import { useForgeDraft } from "@/context/ForgeDraftContext";
+import { useCreationHistory } from "@/context/CreationHistoryContext";
 import { useMate } from "@/context/MateContext";
 import BurnConfirmModal from "@/components/ui/BurnConfirmModal";
 
@@ -29,6 +30,7 @@ const MEME_PROMPTS = [
 
 export default function TokenLoreMemeSection() {
   const { setLoreDraft } = useForgeDraft();
+  const { addLore, lores } = useCreationHistory();
   const { burnFeeLore, burnForLore, canAffordLore } = useMate();
   const [loreBurnModalOpen, setLoreBurnModalOpen] = useState(false);
   const [tokenName, setTokenName] = useState("");
@@ -44,12 +46,16 @@ export default function TokenLoreMemeSection() {
   const theme = launchThemes.find((t) => t.id === themeId);
 
   const sendToForge = () => {
-    setLoreDraft({
+    const draft = {
       tokenName: tokenName.trim(),
       lore: lore.trim(),
       memeAngle: memeAngle.trim(),
       themeName: theme?.name,
-    });
+    };
+    setLoreDraft(draft);
+    if (draft.tokenName || draft.lore || draft.memeAngle) {
+      addLore(draft);
+    }
   };
   const suggestLore = () => {
     if (theme) {
@@ -141,9 +147,35 @@ export default function TokenLoreMemeSection() {
           Create the narrative and meme angle for a token—anything Solana retardness, fun to launch on pump.fun. Name it, write the lore, nail the meme. Copy the block for your pump.fun description or Twitter.
         </p>
         <p className="mb-4 text-[10px] text-zinc-600 sm:text-xs">
-          Pick a theme for instant inspiration, use AI to improve your lore, or write from scratch. Then send to The Forge to create the meme and launch.
+          Pick a theme for instant inspiration, use AI to improve your lore, or write from scratch. Connect your wallet—creations are saved to your folder. Then send to The Forge to create the meme and launch.
         </p>
-
+        {lores.length > 0 && (
+          <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-cyan-500/30 bg-cyan-500/5 p-2">
+            <span className="text-[10px] text-zinc-400">Load from folder:</span>
+            {lores.slice(0, 5).map((l) => (
+              <button
+                key={l.id}
+                type="button"
+                onClick={() => {
+                  setTokenName(l.tokenName);
+                  setLore(l.lore);
+                  setMemeAngle(l.memeAngle);
+                  const t = launchThemes.find((th) => th.name === l.themeName);
+                  if (t) setThemeId(t.id);
+                }}
+                className="rounded border border-cyan-400/40 px-2 py-1 text-[10px] text-cyan-400 hover:bg-cyan-500/20"
+              >
+                {l.tokenName || "Lore"}
+              </button>
+            ))}
+            <Link
+              href="/forge"
+              className="text-[10px] text-cyan-400 hover:underline"
+            >
+              View all →
+            </Link>
+          </div>
+        )}
         <div className="space-y-4 rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 sm:p-5">
           <div>
             <label className="mb-1 block text-xs font-medium text-zinc-400">Token name / concept</label>
@@ -279,6 +311,17 @@ export default function TokenLoreMemeSection() {
                 className="rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-medium text-zinc-950 hover:bg-cyan-400 disabled:opacity-50 disabled:pointer-events-none"
               >
                 {copied ? "Copied!" : "Copy block"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const draft = { tokenName: tokenName.trim(), lore: lore.trim(), memeAngle: memeAngle.trim(), themeName: theme?.name };
+                  if (draft.tokenName || draft.lore || draft.memeAngle) addLore(draft);
+                }}
+                disabled={!fullBlob}
+                className="rounded-lg border border-zinc-600 bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-400 hover:border-zinc-500 hover:text-zinc-300 disabled:opacity-50 disabled:pointer-events-none"
+              >
+                Save to folder
               </button>
               <Link
                 href="/forge"

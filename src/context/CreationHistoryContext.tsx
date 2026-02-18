@@ -2,18 +2,21 @@
 
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import type { LaunchRecord, MemeRecord, UserStorageData } from "@/lib/userStorage";
+import type { LaunchRecord, LoreRecord, MemeRecord, UserStorageData } from "@/lib/userStorage";
 import * as storage from "@/lib/userStorage";
 
 type CreationHistoryContextType = {
   launches: LaunchRecord[];
   memes: MemeRecord[];
+  lores: LoreRecord[];
   lastDraft: UserStorageData["lastDraft"] | null;
   addLaunch: (record: Omit<LaunchRecord, "id" | "createdAt">) => void;
   addMeme: (record: Omit<MemeRecord, "id" | "createdAt">) => void;
+  addLore: (record: Omit<LoreRecord, "id" | "createdAt">) => void;
   saveLastDraft: (draft: UserStorageData["lastDraft"]) => void;
   deleteLaunch: (id: string) => void;
   deleteMeme: (id: string) => void;
+  deleteLore: (id: string) => void;
   loadLastDraft: () => UserStorageData["lastDraft"] | null;
 };
 
@@ -25,6 +28,7 @@ export function CreationHistoryProvider({ children }: { children: React.ReactNod
 
   const [launches, setLaunches] = useState<LaunchRecord[]>([]);
   const [memes, setMemes] = useState<MemeRecord[]>([]);
+  const [lores, setLores] = useState<LoreRecord[]>([]);
   const [lastDraft, setLastDraftState] = useState<UserStorageData["lastDraft"] | null>(null);
 
   useEffect(() => {
@@ -32,10 +36,12 @@ export function CreationHistoryProvider({ children }: { children: React.ReactNod
     if (data) {
       setLaunches(data.launches ?? []);
       setMemes(data.memes ?? []);
+      setLores(data.lores ?? []);
       setLastDraftState(data.lastDraft ?? null);
     } else {
       setLaunches([]);
       setMemes([]);
+      setLores([]);
       setLastDraftState(null);
     }
   }, [walletAddress]);
@@ -54,6 +60,15 @@ export function CreationHistoryProvider({ children }: { children: React.ReactNod
       storage.addMeme(walletAddress, record);
       const meme: MemeRecord = { ...record, id: `meme_${Date.now()}`, createdAt: Date.now() };
       setMemes((prev) => [meme, ...prev].slice(0, 30));
+    },
+    [walletAddress]
+  );
+
+  const addLore = useCallback(
+    (record: Omit<LoreRecord, "id" | "createdAt">) => {
+      storage.addLore(walletAddress, record);
+      const lore: LoreRecord = { ...record, id: `lore_${Date.now()}`, createdAt: Date.now() };
+      setLores((prev) => [lore, ...prev].slice(0, 50));
     },
     [walletAddress]
   );
@@ -82,6 +97,14 @@ export function CreationHistoryProvider({ children }: { children: React.ReactNod
     [walletAddress]
   );
 
+  const deleteLore = useCallback(
+    (id: string) => {
+      storage.deleteLore(walletAddress, id);
+      setLores((prev) => prev.filter((l) => l.id !== id));
+    },
+    [walletAddress]
+  );
+
   const loadLastDraft = useCallback(() => {
     const data = storage.loadUserData(walletAddress);
     return data?.lastDraft ?? null;
@@ -92,12 +115,15 @@ export function CreationHistoryProvider({ children }: { children: React.ReactNod
       value={{
         launches,
         memes,
+        lores,
         lastDraft,
         addLaunch,
         addMeme,
+        addLore,
         saveLastDraft,
         deleteLaunch,
         deleteMeme,
+        deleteLore,
         loadLastDraft,
       }}
     >

@@ -35,8 +35,8 @@ export default function ForgePage() {
     }, 1200); // Give wallet adapter time to auto-connect
     return () => clearTimeout(t);
   }, [connected, router]);
-  const { loreDraft, memeDraft, clearLoreDraft, clearMemeDraft } = useForgeDraft();
-  const { launches, memes, addLaunch, saveLastDraft, loadLastDraft, deleteLaunch, deleteMeme } = useCreationHistory();
+  const { loreDraft, memeDraft, setLoreDraft, clearLoreDraft, clearMemeDraft } = useForgeDraft();
+  const { launches, memes, lores, addLaunch, saveLastDraft, loadLastDraft, deleteLaunch, deleteMeme, deleteLore } = useCreationHistory();
   const [style, setStyle] = useState<ForgeStyleId>("legacy");
   const [chaos, setChaos] = useState(0);
   const [tokenName, setTokenName] = useState("");
@@ -472,7 +472,7 @@ export default function ForgePage() {
                 </button>
               </div>
               <p className="font-pixel text-[9px] text-zinc-500">Pick from history — stored per wallet</p>
-              {(launches.length > 0 || memes.length > 0) ? (
+              {(launches.length > 0 || memes.length > 0 || lores.length > 0) ? (
               <div className="max-h-32 space-y-1 overflow-y-auto">
                 {launches.slice(0, 5).map((l) => (
                   <button
@@ -500,9 +500,24 @@ export default function ForgePage() {
                     <span className="truncate font-pixel text-[9px] text-zinc-400">{m.tokenName || m.caption || "Meme"}</span>
                   </button>
                 ))}
+                {lores.slice(0, 3).map((l) => (
+                  <button
+                    key={l.id}
+                    type="button"
+                    onClick={() => {
+                      setLoreDraft({ tokenName: l.tokenName, lore: l.lore, memeAngle: l.memeAngle, themeName: l.themeName });
+                      setTokenName(l.tokenName);
+                      const parts = [l.lore, l.memeAngle].filter(Boolean);
+                      if (parts.length) setDescription(parts.join("\n\n"));
+                    }}
+                    className="flex w-full items-center gap-2 rounded border border-zinc-700 bg-zinc-800/50 p-1.5 text-left font-pixel text-[9px] transition hover:border-cyan-500/40 hover:bg-cyan-500/10"
+                  >
+                    <span className="truncate text-zinc-400">{l.tokenName || "Lore"}</span>
+                  </button>
+                ))}
               </div>
               ) : (
-                <p className="font-pixel text-[9px] text-zinc-600">No memes or lores yet. Click &quot;Find all&quot; to browse.</p>
+                <p className="font-pixel text-[9px] text-zinc-600">No creations yet. Connect wallet & create—saved to your folder.</p>
               )}
             </RetroCard>
           <RetroCard className="space-y-3 p-3 sm:p-4">
@@ -569,14 +584,22 @@ export default function ForgePage() {
         onClose={() => setCreationsModalOpen(false)}
         launches={launches}
         memes={memes}
+        lores={lores}
         onSelectLaunch={(l) => {
           setTokenName(l.tokenName);
           setTicker(l.ticker);
           setDescription(l.description);
         }}
         onSelectMeme={(m) => setDroppedImage(m.imageDataUrl)}
+        onSelectLore={(l) => {
+          setLoreDraft({ tokenName: l.tokenName, lore: l.lore, memeAngle: l.memeAngle, themeName: l.themeName });
+          setTokenName(l.tokenName);
+          const parts = [l.lore, l.memeAngle].filter(Boolean);
+          if (parts.length) setDescription(parts.join("\n\n"));
+        }}
         deleteLaunch={deleteLaunch}
         deleteMeme={deleteMeme}
+        deleteLore={deleteLore}
       />
     </div>
   );
