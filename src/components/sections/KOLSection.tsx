@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { kols, politicalFigures, wellKnownPeople, memeAnimals, memeSymbols, hotTopics, memecoinTrends } from "@/lib/mockData";
 import { useForgeDraft } from "@/context/ForgeDraftContext";
@@ -1558,6 +1559,12 @@ export default function KOLSection() {
               >
                 Close
               </button>
+              <Link
+                href="/forge?folder=1"
+                className="rounded-lg border border-zinc-600 px-3 py-1.5 text-xs text-zinc-400 hover:border-cyan-500/40 hover:text-cyan-400"
+              >
+                View my folder
+              </Link>
             </div>
           </div>
         )}

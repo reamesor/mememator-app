@@ -44,6 +44,12 @@ export default function ForgePage() {
   const [description, setDescription] = useState("");
   const [launchModalOpen, setLaunchModalOpen] = useState(false);
   const [creationsModalOpen, setCreationsModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("folder") === "1") {
+      setCreationsModalOpen(true);
+    }
+  }, []);
   const [droppedImage, setDroppedImage] = useState<string | null>(null);
   const [searchInput, setSearchInput] = useState("");
   const [twitterLinkInput, setTwitterLinkInput] = useState("");

@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import Link from "next/link";
+import { useCreationHistory } from "@/context/CreationHistoryContext";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 const CAPYBARA_FACES = Array.from({ length: 11 }, (_, i) => `/capybara-faces/capybara-${i + 1}.png`);
 
@@ -433,12 +436,12 @@ export default function CommanderMateMemeGenerator() {
     setImgLoaded(true);
   }, [presetFeeling, presetThinking, backgroundId]);
 
-  const handleDownload = useCallback(async () => {
+  const renderMemeToCanvas = useCallback(async (): Promise<string | null> => {
     const canvas = canvasRef.current;
-    if (!canvas || faces.length === 0) return;
+    if (!canvas || faces.length === 0) return null;
 
     const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    if (!ctx) return null;
 
     canvas.width = MEME_WIDTH;
     canvas.height = MEME_HEIGHT;
@@ -471,11 +474,39 @@ export default function CommanderMateMemeGenerator() {
       }
     }
 
+    return canvas.toDataURL("image/png");
+  }, [faces, presetFeeling, presetThinking, backgroundId]);
+
+  const handleDownload = useCallback(async () => {
+    const dataUrl = await renderMemeToCanvas();
+    if (!dataUrl) return;
     const a = document.createElement("a");
     a.download = `commander-mate-mood-${Date.now()}.png`;
-    a.href = canvas.toDataURL("image/png");
+    a.href = dataUrl;
     a.click();
-  }, [faces, presetFeeling, presetThinking, backgroundId]);
+  }, [renderMemeToCanvas]);
+
+  const { addMeme } = useCreationHistory();
+  const { connected } = useWallet();
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "need-wallet">("idle");
+
+  const handleSaveToFolder = useCallback(async () => {
+    if (!connected) {
+      setSaveStatus("need-wallet");
+      setTimeout(() => setSaveStatus("idle"), 2000);
+      return;
+    }
+    setSaveStatus("saving");
+    const dataUrl = await renderMemeToCanvas();
+    if (!dataUrl) {
+      setSaveStatus("idle");
+      return;
+    }
+    const caption = [presetFeeling, presetThinking].filter(Boolean).join(" · ");
+    addMeme({ imageDataUrl: dataUrl, caption, tokenName: "Commander MATE" });
+    setSaveStatus("saved");
+    setTimeout(() => setSaveStatus("idle"), 2000);
+  }, [connected, renderMemeToCanvas, addMeme, presetFeeling, presetThinking]);
 
   const selectedFace = faces.find((f) => f.id === selectedFaceId);
 
@@ -737,13 +768,35 @@ export default function CommanderMateMemeGenerator() {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={handleDownload}
-              className="mt-5 w-full rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-600 px-4 py-3 text-sm font-semibold text-zinc-950 shadow-lg transition hover:from-cyan-400 hover:to-cyan-500 hover:shadow-cyan-500/25"
-            >
-              Download meme
-            </button>
+            <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+              <button
+                type="button"
+                onClick={handleDownload}
+                className="flex-1 rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-600 px-4 py-3 text-sm font-semibold text-zinc-950 shadow-lg transition hover:from-cyan-400 hover:to-cyan-500 hover:shadow-cyan-500/25"
+              >
+                Download meme
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveToFolder}
+                disabled={saveStatus === "saving"}
+                className="flex-1 rounded-xl border-2 border-cyan-500/60 bg-cyan-500/10 px-4 py-3 text-sm font-semibold text-cyan-400 transition hover:bg-cyan-500/20 disabled:opacity-50"
+              >
+                {saveStatus === "saving"
+                  ? "Saving…"
+                  : saveStatus === "saved"
+                    ? "Saved!"
+                    : saveStatus === "need-wallet"
+                      ? "Connect wallet first"
+                      : "Save to folder"}
+              </button>
+              <Link
+                href="/forge?folder=1"
+                className="rounded-xl border border-zinc-600 bg-zinc-800/80 px-4 py-3 text-center text-sm font-medium text-zinc-400 transition hover:border-cyan-500/40 hover:text-cyan-400"
+              >
+                View my folder
+              </Link>
+            </div>
           </div>
         </div>
       </div>
