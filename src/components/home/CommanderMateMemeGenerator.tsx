@@ -279,11 +279,7 @@ function drawMemeBase(
   ctx.fillRect(0, h - 40, w, 40);
   ctx.fillStyle = "rgba(34, 211, 238, 0.9)";
   ctx.font = "500 11px JetBrains Mono, ui-monospace, monospace";
-  ctx.fillText("Mememator", cx - 42, h - 20);
-  ctx.fillStyle = "#fb923c";
-  ctx.fillText("$MATE", cx + 2, h - 20);
-  ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
-  ctx.fillText("· Commander", cx + 52, h - 20);
+  ctx.fillText("Commander MATE feeling memeish", cx, h - 20);
 }
 
 function clampPosition(x: number, y: number, size: keyof typeof FACE_SIZES): { x: number; y: number } {
